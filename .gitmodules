@@ -1,0 +1,6 @@
+[submodule "extern/fast_io"]
+	path = extern/fast_io
+	url = https://github.com/cppfastio/fast_io.git
+[submodule "extern/rttr"]
+	path = extern/rttr
+	url = https://github.com/rttrorg/rttr.git
