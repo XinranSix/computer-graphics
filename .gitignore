@@ -12,6 +12,7 @@
 /**/.idea
 /**/.vs
 /**/*.iml
+/**/vsxmake2022
 
 # binary
 /**/*.dll

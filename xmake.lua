@@ -23,3 +23,8 @@ includes("examples")
 
 -- 包配置文件
 includes("package.lua")
+
+target("imgui")
+    add_files("./extern/imgui/**.cpp")
+    set_kind("static")
+    add_packages("glfw", "glad")
