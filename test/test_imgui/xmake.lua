@@ -1,5 +1,7 @@
 target("test_imgui")
     add_files("./main.cpp")
-    set_rundir("$(projectdir)")
     add_packages("opengl", "glfw", "glad", "glm")
     add_deps("imgui")
+    after_build(function (target)
+        os.cp("$(projectdir)/asset", target:targetdir())
+    end)

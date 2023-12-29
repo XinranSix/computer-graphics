@@ -1,119 +1,174 @@
-#ifndef SHADER_H
-#define SHADER_H
-
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
-#include <string>
-#include <fstream>
-#include <sstream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include <iostream>
+#include <string>
 
-class Shader {
-public:
-    unsigned int ID;
-    // constructor generates the shader on the fly
-    // ------------------------------------------------------------------------
-    Shader(const char *vertexPath, const char *fragmentPath) {
-        // 1. retrieve the vertex/fragment source code from filePath
-        std::string vertexCode;
-        std::string fragmentCode;
-        std::ifstream vShaderFile;
-        std::ifstream fShaderFile;
-        // ensure ifstream objects can throw exceptions:
-        vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        try {
-            // open files
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
-            std::stringstream vShaderStream, fShaderStream;
-            // read file's buffer contents into streams
-            vShaderStream << vShaderFile.rdbuf();
-            fShaderStream << fShaderFile.rdbuf();
-            // close file handlers
-            vShaderFile.close();
-            fShaderFile.close();
-            // convert stream into string
-            vertexCode = vShaderStream.str();
-            fragmentCode = fShaderStream.str();
-        } catch (std::ifstream::failure &e) {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: "
-                      << e.what() << std::endl;
-        }
-        const char *vShaderCode = vertexCode.c_str();
-        const char *fShaderCode = fragmentCode.c_str();
-        // 2. compile shaders
-        unsigned int vertex, fragment;
-        // vertex shader
-        vertex = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex, 1, &vShaderCode, NULL);
-        glCompileShader(vertex);
-        checkCompileErrors(vertex, "VERTEX");
-        // fragment Shader
-        fragment = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment, 1, &fShaderCode, NULL);
-        glCompileShader(fragment);
-        checkCompileErrors(fragment, "FRAGMENT");
-        // shader Program
-        ID = glCreateProgram();
-        glAttachShader(ID, vertex);
-        glAttachShader(ID, fragment);
-        glLinkProgram(ID);
-        checkCompileErrors(ID, "PROGRAM");
-        // delete the shaders as they're linked into our program now and no
-        // longer necessary
-        glDeleteShader(vertex);
-        glDeleteShader(fragment);
-    }
-    // activate the shader
-    // ------------------------------------------------------------------------
-    void use() {
-        glUseProgram(ID);
-    }
-    // utility uniform functions
-    // ------------------------------------------------------------------------
-    void setBool(const std::string &name, bool value) const {
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
-    }
-    // ------------------------------------------------------------------------
-    void setInt(const std::string &name, int value) const {
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
-    }
-    // ------------------------------------------------------------------------
-    void setFloat(const std::string &name, float value) const {
-        glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
-    }
+int main(int argc, char *argv[]) {
 
-private:
-    // utility function for checking shader compilation/linking errors.
-    // ------------------------------------------------------------------------
-    void checkCompileErrors(unsigned int shader, std::string type) {
-        int success;
-        char infoLog[1024];
-        if (type != "PROGRAM") {
-            glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-            if (!success) {
-                glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-                std::cout
-                    << "ERROR::SHADER_COMPILATION_ERROR of type: " << type
-                    << "\n"
-                    << infoLog
-                    << "\n -- "
-                       "--------------------------------------------------- -- "
-                    << std::endl;
-            }
-        } else {
-            glGetProgramiv(shader, GL_LINK_STATUS, &success);
-            if (!success) {
-                glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-                std::cout
-                    << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
-                    << infoLog
-                    << "\n -- "
-                       "--------------------------------------------------- -- "
-                    << std::endl;
+#pragma region glfw init
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow *window { glfwCreateWindow(1080, 960, "title", nullptr,
+                                          nullptr) };
+    if (window == nullptr) {
+        std::cerr << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+        std::cerr << "Failed to initialize GLAD" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+#pragma endregion
+
+#pragma region ImGui init
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext(nullptr);
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.Fonts->AddFontFromFileTTF(
+        "./asset/font/MSYH.TTC", 20, nullptr,
+        io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiViewportFlags_NoDecoration;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    io.ConfigFlags |= ImGuiCol_DockingEmptyBg;
+
+    ImGui::StyleColorsLight();
+    ImGuiStyle &style = ImGui::GetStyle();
+
+    style.WindowRounding = 12;
+    style.ChildRounding = 12;
+    style.FrameRounding = 12;
+    style.PopupRounding = 6;
+    style.ScrollbarRounding = 8;
+    style.GrabRounding = 12;
+    style.TabRounding = 8;
+
+    ImVec4 *colors { style.Colors };
+    colors[ImGuiCol_BorderShadow] = ImVec4(0.66f, 0.66f, 0.66f, 0.00f);
+    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.47f, 0.47f, 0.47f, 0.40f);
+    colors[ImGuiCol_FrameBgActive] = ImVec4(0.79f, 0.79f, 0.79f, 0.67f);
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+    colors[ImGuiCol_CheckMark] = ImVec4(0.26f, 0.26f, 0.26f, 1.00f);
+    colors[ImGuiCol_SliderGrab] = ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
+    colors[ImGuiCol_SliderGrabActive] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+    colors[ImGuiCol_Button] = ImVec4(0.65f, 0.65f, 0.65f, 0.40f);
+    colors[ImGuiCol_ButtonHovered] = ImVec4(0.66f, 0.66f, 0.66f, 1.00f);
+    colors[ImGuiCol_ButtonActive] = ImVec4(0.85f, 0.85f, 0.85f, 1.00f);
+    colors[ImGuiCol_HeaderHovered] = ImVec4(0.70f, 0.70f, 0.70f, 0.00f);
+    colors[ImGuiCol_HeaderActive] = ImVec4(0.85f, 0.85f, 0.85f, 1.00f);
+    colors[ImGuiCol_SeparatorHovered] = ImVec4(0.60f, 0.60f, 0.60f, 0.78f);
+    colors[ImGuiCol_ResizeGripActive] = ImVec4(0.75, 0.75, 0.75, 1.00F);
+    colors[ImGuiCol_ResizeGrip] = ImVec4(0.25f, 0.25f, 0.25f, 0.20f);
+    colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.36, 0.36, 0.36, 0.67f);
+    colors[ImGuiCol_ResizeGripActive] = ImVec4(0.74, 0.74, 0.74, 0.95f);
+    colors[ImGuiCol_Tab] = ImVec4(0.64f, 0.64f, 0.64f, 0.86f);
+    colors[ImGuiCol_TabHovered] = ImVec4(0.24f, 0.24f, 0.24f, 0.80f);
+    colors[ImGuiCol_TabActive] = ImVec4(0.68f, 0.72f, 0.76f, 1.00f);
+    colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.66f, 0.66f, 0.66f, 1.00f);
+    colors[ImGuiCol_DockingPreview] = ImVec4(0.49f, 0.49f, 0.49f, 0.70f);
+    colors[ImGuiCol_TextSelectedBg] = ImVec4(0.71f, 0.71f, 0.71f, 0.35f);
+    colors[ImGuiCol_NavHighlight] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
+    colors[ImGuiCol_FrameBg] = ImVec4(0.52f, 0.52f, 0.52f, 0.54f);
+    colors[ImGuiCol_Header] = ImVec4(0.67, 0.67, 0.67, 0.31f);
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
+#pragma endregion
+
+    float background_color[] { 0.7137f, 0.7333f, 0.7686f, 1.0f };
+
+    std::string text { "胡宇婷" };
+    char text_box[100] { "Text Box" };
+    ImVec4 color;
+
+#pragma region loop
+    while (!glfwWindowShouldClose(window)) {
+        glClearColor(background_color[0], background_color[1],
+                     background_color[2], background_color[3]);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::DockSpaceOverViewport();
+        using namespace std::string_literals;
+        ImGui::Begin( "胡宇婷");
+
+        /*
+                ImDrawList *list { ImGui::GetForegroundDrawList() };
+                list->AddRectFilled(ImVec2(0, 0), ImGui::GetMousePos(),
+                                    ImColor(0, 0, 0));
+                                    */
+
+        if (ImGui::IsKeyPressed(ImGuiKey_Q)) {
+            std::cout << "Q\n";
+        }
+
+        // ImGui::ColorEdit4("background color", background_color,
+        //                   ImGuiColorEditFlags_AlphaBar);
+        ImGui::ColorEdit4("background color", background_color);
+        ImGui::NewLine();
+
+        if (ImGui::Button("Button")) {
+            std::cerr << "Button has been clicked\n";
+        }
+        ImGui::NewLine();
+        ImGui::InputText("Text Box", text_box, IM_ARRAYSIZE(text_box));
+        ImGui::NewLine();
+        ImGui::BeginListBox("List Box");
+        for (size_t i = 0; i < 100; ++i) {
+            if (ImGui::Selectable(std::to_string(i).c_str(),
+                                  std::to_string(i) == text)) {
+                text = std::to_string(i);
             }
         }
+        ImGui::EndListBox();
+        ImGui::NewLine();
+        if (ImGui::BeginCombo("Combo", text.c_str())) {
+            for (size_t i = 0; i < 100; ++i) {
+                if (ImGui::Selectable(std::to_string(i).c_str())) {
+                    text = std::to_string(i);
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::End();
+
+        ImGui::ShowDemoWindow();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            GLFWwindow *backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
-};
-#endif
+#pragma endregion
+    glfwTerminate();
+    return 0;
+}

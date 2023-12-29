@@ -27,6 +27,5 @@ package("fast_io")
 package_end()
 
 add_requires("fast_io") 
-add_requires("rttr") 
-
+add_requires("fast_io") 
 

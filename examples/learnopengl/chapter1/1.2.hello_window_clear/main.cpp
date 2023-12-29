@@ -1,39 +1,26 @@
-#include <algorithm>
-#include <format>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "exception/exception.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #include <iostream>
 #include <iterator>
-#include <ostream>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <source_location>
 #include <vector>
+#include <algorithm>
+#include <format>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
-
-class MyException : public std::exception {
-public:
-    MyException(std::string message,
-                std::source_location location = std::source_location::current())
-        : message { std::move(message) }, location { std::move(location) } {
-    }
-
-    const char *what() const noexcept override {
-        return message.c_str();
-    }
-
-    virtual const std::source_location where() const noexcept {
-        return location;
-    }
-
-private:
-    std::string message;
-    std::source_location location;
-};
 
 struct WindownInfo {
 public:
@@ -88,7 +75,7 @@ void init() {
 
     if (window == nullptr) {
         shutdown();
-        throw MyException { "Failed to create GLFW window" };
+        throw ht::LocationException { "Failed to create GLFW window" };
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -97,7 +84,7 @@ void init() {
     // ---------------------------------------
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
         shutdown();
-        throw MyException { "Failed to initialize GLAD" };
+        throw ht::LocationException { "Failed to initialize GLAD" };
     }
 }
 
@@ -127,7 +114,7 @@ int main() {
     try {
         init();
         run();
-    } catch (const MyException &e) {
+    } catch (const ht::LocationException &e) {
         const auto &location { e.where() };
         std::cerr << std::format("Caught: '{}' at line {} in {}.", e.what(),
                                  location.line(), location.function_name())

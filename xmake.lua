@@ -20,6 +20,7 @@ add_includedirs("include")
 includes("src")
 includes("test")
 includes("examples")
+includes("ht")
 
 -- 包配置文件
 includes("package.lua")
