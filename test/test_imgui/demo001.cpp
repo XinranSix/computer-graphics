@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 
     float background_color[] { 0.7137f, 0.7333f, 0.7686f, 1.0f };
 
-    std::string text { "胡宇婷" };
+    std::string text { "asv" };
     char text_box[100] { "Text Box" };
     ImVec4 color;
 
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport();
         using namespace std::string_literals;
-        ImGui::Begin( "胡宇婷");
+        ImGui::Begin("Sceen");
 
         /*
                 ImDrawList *list { ImGui::GetForegroundDrawList() };
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
         ImGui::InputText("Text Box", text_box, IM_ARRAYSIZE(text_box));
         ImGui::NewLine();
         ImGui::BeginListBox("List Box");
-        for (size_t i = 0; i < 100; ++i) {
+        for (int i = 0; i < 100; ++i) {
             if (ImGui::Selectable(std::to_string(i).c_str(),
                                   std::to_string(i) == text)) {
                 text = std::to_string(i);

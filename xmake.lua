@@ -16,6 +16,8 @@ end
 
 add_includedirs("include")
 
+-- add_defines("STB_IMAGE_IMPLEMENTATION")
+
 -- 子模块
 includes("src")
 includes("test")
