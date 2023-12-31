@@ -27,8 +27,8 @@ int main(int argc, char *argv[]) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window { glfwCreateWindow(src_width, src_height, "title",
-                                          nullptr, nullptr) };
+    GLFWwindow *window { glfwCreateWindow(800, 600, "title", nullptr,
+                                          nullptr) };
     if (window == nullptr) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -143,11 +143,12 @@ int main(int argc, char *argv[]) {
         ImGui::End();
 
         ImGui::Begin("Scene");
+        auto [x, y] = ImGui::GetWindowSize();
+        src_width = x;
+        src_height = y;
         ImGui::Image(reinterpret_cast<void *>(static_cast<intptr_t>(texture)),
                      ImVec2 { (float)src_width, (float)src_height });
-        ImVec2 size = ImGui::GetWindowSize();
-        src_height = size.y;
-        src_width = size.x;
+
         ImGui::End();
 
         ImGui::Render();

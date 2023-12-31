@@ -68,6 +68,7 @@ class Image {
 public:
     Image(std::string_view path) {
         // 加载并生成纹理
+        genTextures();
         texture->use();
         data = stbi_load(path.data(), &width, &height, &channels, 0);
         if (data) {
@@ -118,46 +119,51 @@ public:
 
 WindowState windowState;
 
-void ImGuiRenderImage(std::string_view name, const Image &image) {
-    ImGui::Begin(name.data());
-    ImGui::Image(ImTextureID(reinterpret_cast<void *>(image.getTextureId())),
-                 image.size);
-    ImGui::End();
-}
+class ImGuiLayer {
+public:
+    static void ImGuiInit(GLFWwindow *window) {
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext(nullptr);
+        ImGuiIO &io = ImGui::GetIO();
+        (void)io;
 
-void ImGuiInit(GLFWwindow *window) {
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext(nullptr);
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 330");
+    }
 
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
-}
+    static void ImGuiRenderPre() {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+    }
 
-void ImGuiRenderPre() {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-}
+    static void ImGuiRender() {
+        ImGui::Begin("Edit");
+        ImGui::ColorEdit4("Background color", windowState.background_color,
+                          ImGuiColorEditFlags_AlphaBar);
+        ImGui::End();
+    }
 
-void ImGuiRenderPost() {
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
+    static void ImGuiRenderPost() {
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
 
-void ImGuiRender() {
-    ImGui::Begin("Edit");
-    ImGui::ColorEdit4("Background color", windowState.background_color,
-                      ImGuiColorEditFlags_AlphaBar);
-    ImGui::End();
-}
+    static void ImGuiShutdown() {
+        // 释放 ImGui 资源
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui::DestroyContext();
+    }
 
-void ImGuiShutdown() {
-    // 释放 ImGui 资源
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui::DestroyContext();
-}
+public:
+    static void ImGuiRenderImage(std::string_view name, const Image &image) {
+        ImGui::Begin(name.data());
+        ImGui::Image(
+            ImTextureID(reinterpret_cast<void *>(image.getTextureId())),
+            image.size);
+        ImGui::End();
+    }
+};
 
 int main() {
 
@@ -186,7 +192,7 @@ int main() {
         return -1;
     }
 
-    ImGuiInit(window);
+    ImGuiLayer::ImGuiInit(window);
 
     Image image1 { "asset/image/yy.png" };
     Image image2 { "asset/image/download.jpg" };
@@ -197,18 +203,18 @@ int main() {
             windowState.background_color[2], windowState.background_color[3]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        ImGuiRenderPre();
-        ImGuiRender();
-        ImGuiRenderImage("ys", image1);
-        ImGuiRenderImage("test1", image2);
-        ImGuiRenderPost();
+        ImGuiLayer::ImGuiRenderPre();
+        ImGuiLayer::ImGuiRender();
+        ImGuiLayer::ImGuiRenderImage("ys", image1);
+        ImGuiLayer::ImGuiRenderImage("test1", image2);
+        ImGuiLayer::ImGuiRenderPost();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
     glfwTerminate();
-    ImGuiShutdown();
+    ImGuiLayer::ImGuiShutdown();
 
     return 0;
 }
