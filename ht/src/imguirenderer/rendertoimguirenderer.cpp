@@ -13,6 +13,11 @@ namespace ht {
         ImGuiIO &io = ImGui::GetIO();
         (void)io;
 
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiViewportFlags_NoDecoration;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        io.ConfigFlags |= ImGuiCol_DockingEmptyBg;
+
         ImGui_ImplGlfw_InitForOpenGL(window->getGLFWwindow(), true);
         ImGui_ImplOpenGL3_Init("#version 330");
 
@@ -67,7 +72,7 @@ namespace ht {
         ImGui::Begin("Scene");
         ImGui::Image(
             reinterpret_cast<void *>(static_cast<intptr_t>(textureColorbuffer)),
-            ImVec2 { 800.0f, 600.0f });
+            ImGui::GetWindowSize());
         ImGui::End();
         ImGui::Render();
         ImGuiIO &io = ImGui::GetIO();

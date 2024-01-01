@@ -1,6 +1,6 @@
 target('1.2.hello_window_clear')
     add_files("./**.cpp")
-    add_packages("opengl", "glfw", "glad", "glm", "assimp", "stb", "fmt")
+    add_packages("opengl", "glfw", "glad", "glm", "assimp", "stb", "fmt", "spdlog")
     add_deps("ht", "imgui")
     after_build(function (target)
         os.cp("$(projectdir)/asset", target:targetdir())

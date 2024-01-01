@@ -76,8 +76,10 @@ add_requires("wxwidgets") -- Cross-Platform C++ GUI Library
 
 -- 命令行解析库
 add_requires("gflags") 
+add_requires("cxxopts")
 
 -- 其他库
 add_requires("icu4c") -- C/C++ libraries for Unicode and globalization.
 add_requires("libevent") -- 事件库
 add_requires("box2d") -- 
+

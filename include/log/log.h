@@ -2,11 +2,12 @@
 
 #include <memory>
 #include <spdlog/spdlog.h>
+#include <string_view>
 
 namespace ht {
     class Log {
     public:
-        static void init();
+        static void init(std::string_view file = "./ht.log");
 
         inline static std::shared_ptr<spdlog::logger> &getConsoleLogger() {
             return consoleLogger;
@@ -35,5 +36,4 @@ namespace ht {
 #define HT_FILE_INFO(...) ::ht::Log::getFileLogger()->info(__VA_ARGS__)
 #define HT_FILE_WARN(...) ::ht::Log::getFileLogger()->warn(__VA_ARGS__)
 #define HT_FILE_ERROE(...) ::ht::Log::getFileLogger()->error(__VA_ARGS__)
-#define HT_FILE_CRITICAL(...)                                                  \
-    ::ht::Log::getFileLogger()->critical(__VA_ARGS__)
+#define HT_FILE_CRITICAL(...) ::ht::Log::getFileLogger()->critical(__VA_ARGS__)

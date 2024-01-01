@@ -13,6 +13,7 @@
 /**/.vs
 /**/*.iml
 /**/vsxmake2022
+/**/.VSCodeCounter
 
 # binary
 /**/*.dll

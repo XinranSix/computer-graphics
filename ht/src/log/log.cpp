@@ -5,12 +5,12 @@
 
 namespace ht {
 
-    void Log::init() {
+    void Log::init(std::string_view file) {
 
         consoleLogger = spdlog::stdout_color_mt("Console");
         consoleLogger->set_level(spdlog::level::trace);
 
-        fileLogger = spdlog::basic_logger_mt("File", "ht.log");
+        fileLogger = spdlog::basic_logger_mt("File", file.data());
         fileLogger->set_level(spdlog::level::trace);
     }
 
