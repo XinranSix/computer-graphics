@@ -11,7 +11,7 @@ namespace ht {
     public:
         GLFWWindowWrapper(int width, int height, std::string_view title);
         virtual ~GLFWWindowWrapper();
-        virtual void mainLoop();
+        virtual void run();
 
     public:
         GLFWWindowWrapper(GLFWWindowWrapper &) = delete;
@@ -19,27 +19,42 @@ namespace ht {
         GLFWWindowWrapper &operator=(const GLFWWindowWrapper &) = delete;
         GLFWWindowWrapper &operator=(const GLFWWindowWrapper &&) = delete;
 
-    private:
         /**
          * @brief 初始化 GLFW
          *
          * @return true 初始化成功
          * @return false 初始化失败
          */
-        bool init();
+        virtual void init();
+
+    protected:
         /**
          * @brief 创建 GLFWwindow，并初始化 glad
          */
-        void createWindow();
-        void setupCallbacks();
+        virtual void createWindow();
+        virtual void setupCallbacks();
 
-    private:
+    protected:
         int width {};
         int height {};
         std::string title;
         GLFWwindow *window {};
 
-    private:
+    public:
+        virtual int getWidth() const {
+            return width;
+        }
+        virtual int getHeight() const {
+            return height;
+        }
+        virtual std::string getTitle() const {
+            return title;
+        }
+        virtual GLFWwindow *getGLFWwindow() const {
+            return window;
+        }
+
+    protected:
         static void ErrorCallback(int error, const char *description);
         static void KeyCallback(GLFWwindow *window, int key, int scancode,
                                 int action, int mods);

@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     ImGui::CreateContext(nullptr);
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
-    io.Fonts->AddFontFromFileTTF(
+   /*  io.Fonts->AddFontFromFileTTF(
         "./asset/font/MSYH.TTC", 20, nullptr,
         io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
     colors[ImGuiCol_TextSelectedBg] = ImVec4(0.71f, 0.71f, 0.71f, 0.35f);
     colors[ImGuiCol_NavHighlight] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
     colors[ImGuiCol_FrameBg] = ImVec4(0.52f, 0.52f, 0.52f, 0.54f);
-    colors[ImGuiCol_Header] = ImVec4(0.67, 0.67, 0.67, 0.31f);
+    colors[ImGuiCol_Header] = ImVec4(0.67, 0.67, 0.67, 0.31f); */
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::DockSpaceOverViewport();
+        // ImGui::DockSpaceOverViewport();
         using namespace std::string_literals;
         ImGui::Begin("Sceen");
 
@@ -157,13 +157,13 @@ int main(int argc, char *argv[]) {
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
+/* 
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             GLFWwindow *backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
             glfwMakeContextCurrent(backup_current_context);
-        }
+        } */
 
         glfwSwapBuffers(window);
         glfwPollEvents();

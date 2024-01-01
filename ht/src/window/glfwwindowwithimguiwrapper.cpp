@@ -1,21 +1,29 @@
-#include "window/glfwwindowwrapper.h"
+#include "window/glfwwindowwithimguiwrapper.h"
 #include "log/log.h"
 #include "exception/exception.h"
 
 #include <string>
 
 namespace ht {
-    GLFWWindowWrapper::GLFWWindowWrapper(int width, int height,
-                                         std::string_view title)
-        : width { width }, height { height }, title { title } {
-    }
+    // GLFWWindowWithImGuiWrapper::GLFWWindowWithImGuiWrapper(
+    //     int width, int height, std::string_view title)
+    //     : GLFWWindowWrapper { width, height, title } {
+    //     // if (!this->init()) {
+    //     //     HT_CONSOLE_ERROE("Failed to initialize GLFW");
+    //     //     throw ht::LocationException { "Failed to initialize GLFW" };
+    //     // }
+    //     // createWindow();
+    //     // setupCallbacks();
+    // }
 
-    GLFWWindowWrapper::~GLFWWindowWrapper() {
-        glfwTerminate();
-    }
+    // GLFWWindowWithImGuiWrapper::~GLFWWindowWithImGuiWrapper() {
+    //     glfwTerminate();
+    // }
 
-    void GLFWWindowWrapper::run() {
+    void GLFWWindowWithImGuiWrapper::run() {
         while (!glfwWindowShouldClose(window)) {
+            glClearColor(1, 0, 0, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             // 处理输入事件
             glfwPollEvents();
             // 渲染纹理
@@ -28,14 +36,14 @@ namespace ht {
             //     windowState.background_color[3]);
             // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             // 渲染ImGui
-            // imguiRenderer->Render();
+            imguiRenderer->Render();
             // 交换缓冲区和检查事件
             glfwSwapBuffers(window);
-            glfwPollEvents();
+            // glfwPollEvents();
         }
     }
 
-    void GLFWWindowWrapper::init() {
+    void GLFWWindowWithImGuiWrapper::init() {
         if (!glfwInit()) {
             HT_CONSOLE_ERROE("Failed to initialize GLFW");
             throw ht::LocationException { "Failed to initialize GLFW" };
@@ -50,16 +58,10 @@ namespace ht {
         setupCallbacks();
     }
 
-    void GLFWWindowWrapper::setupCallbacks() {
-        glfwSetErrorCallback(ErrorCallback);
-        glfwSetKeyCallback(window, KeyCallback);
-        glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-    }
-
     /**
      * @brief 创建 GLFWwindow，并初始化 glad
      */
-    void GLFWWindowWrapper::createWindow() {
+    void GLFWWindowWithImGuiWrapper::createWindow() {
         window =
             glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
         if (window == nullptr) {
@@ -77,24 +79,17 @@ namespace ht {
             glfwTerminate();
             throw ht::LocationException { "Failed to initialize GLAD" };
         }
-
-        // imguiRenderer = std::make_unique<ImGuiRenderer>(window);
-    }
-
-    void GLFWWindowWrapper::ErrorCallback(int error, const char *description) {
-        HT_CONSOLE_ERROE("GLFW Error {}: {}", error, description);
-    }
-
-    void GLFWWindowWrapper::KeyCallback(GLFWwindow *window, int key,
-                                        int scancode, int action, int mods) {
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
+        if (imguiRenderer == nullptr) {
+            HT_CONSOLE_ERROE("ImGui not created");
+            glfwTerminate();
+            throw ht::LocationException { "ImGui not created" };
         }
+        imguiRenderer->init();
     }
 
-    void GLFWWindowWrapper::FramebufferSizeCallback(GLFWwindow *window,
-                                                    int width, int height) {
-        glViewport(0, 0, width, height);
+    void
+    GLFWWindowWithImGuiWrapper::setImGuiRender(ImGuiRenderer *imguiRenderer) {
+        this->imguiRenderer = std::unique_ptr<ImGuiRenderer> { imguiRenderer };
     }
 
 } // namespace ht
