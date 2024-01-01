@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[]) {
     ht::Log::init();
-    ht::GLFWWindowWrapper window { 800, 600, "OPengl" };
+    ht::GLFWWindowWrapper window { 800, 600, "OpenGL" };
     window.init();
     window.run();
     return 0;

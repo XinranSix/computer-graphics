@@ -1,12 +1,7 @@
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "exception/exception.h"
-#include "log/log.h"
+
 #include "imguirenderer/imguiconfigrenderer.h"
 
 namespace ht {
@@ -69,29 +64,20 @@ namespace ht {
         ImGui_ImplOpenGL3_Init("#version 330");
     }
 
-    // ImGuiConfigRenderer::~ImGuiConfigRenderer() {
-    //     ImGui_ImplOpenGL3_Shutdown();
-    //     ImGui_ImplGlfw_Shutdown();
-    //     ImGui::DestroyContext();
-    // }
-
     void ImGuiConfigRenderer::Render() {
+        // glClearColor(window->backgroundColor[0], window->backgroundColor[1],
+        //              window->backgroundColor[2], window->backgroundColor[3]);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport();
-        // ImGui::Begin("Edit");
-        // ImGui::ColorEdit4("background color", background_color,
-        //                   ImGuiColorEditFlags_AlphaBar);
-        // ImGui::End();
+        ImGui::Begin("Edit");
+        ImGui::ColorEdit4("background color", window->backgroundColor,
+                          ImGuiColorEditFlags_AlphaBar);
+        ImGui::End();
         ImGui::Begin("Scene");
-        // ImGui::Image(
-        //     reinterpret_cast<void
-        //     *>(static_cast<intptr_t>(textureColorbuffer)), ImVec2 { 800.0f,
-        //     600.0f });
-        // ImVec2 size = ImGui::GetWindowSize();
-        // src_height = size.y;
-        // src_width = size.x;
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

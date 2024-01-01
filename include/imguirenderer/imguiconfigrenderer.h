@@ -11,11 +11,6 @@ namespace ht {
     public:
         using ImGuiRenderer::ImGuiRenderer;
         virtual void init();
-        // virtual ~ImGuiConfigRenderer();
         virtual void Render();
-
-    private:
-    // protected:
-    //     GLFWWindowWrapper *window;
     };
 } // namespace ht

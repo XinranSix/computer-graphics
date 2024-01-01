@@ -1,7 +1,3 @@
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -87,7 +83,7 @@ namespace ht {
             HT_CONSOLE_ERROE("Framebuffer is not complete!");
             throw LocationException { "Framebuffer is not complete!" };
         }
-        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     RenderToImGuiConfigRenderer::~RenderToImGuiConfigRenderer() {
@@ -95,17 +91,17 @@ namespace ht {
         glDeleteFramebuffers(1, &framebuffer);
         glDeleteTextures(1, &textureColorbuffer);
         // 关闭ImGui
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
+        // ImGui_ImplOpenGL3_Shutdown();
+        // ImGui_ImplGlfw_Shutdown();
+        // ImGui::DestroyContext();
     }
 
     void RenderToImGuiConfigRenderer::Render() {
         // 渲染到FBO
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        // glClearColor(background_color[0], background_color[1],
-        //              background_color[2], background_color[3]);
-        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(window->backgroundColor[0], window->backgroundColor[1],
+                     window->backgroundColor[2], window->backgroundColor[3]);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // ImGui渲染准备
         ImGui_ImplOpenGL3_NewFrame();
@@ -113,16 +109,14 @@ namespace ht {
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport();
         ImGui::Begin("Edit");
-        // ImGui::ColorEdit4("background color", background_color,
-        //                   ImGuiColorEditFlags_AlphaBar);
+        ImGui::ColorEdit4("background color", window->backgroundColor,
+                          ImGuiColorEditFlags_AlphaBar);
         ImGui::End();
         ImGui::Begin("Scene");
+        auto [x, y] = ImGui::GetWindowSize();
         ImGui::Image(
             reinterpret_cast<void *>(static_cast<intptr_t>(textureColorbuffer)),
-            ImVec2 { 800.0f, 600.0f });
-        // ImVec2 size = ImGui::GetWindowSize();
-        // src_height = size.y;
-        // src_width = size.x;
+            ImGui::GetWindowSize());
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

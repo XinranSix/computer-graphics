@@ -41,6 +41,9 @@ namespace ht {
         GLFWwindow *window {};
 
     public:
+        float backgroundColor[4] { 0.7137f, 0.7333f, 0.7686f, 1.0f };
+
+    public:
         virtual int getWidth() const {
             return width;
         }

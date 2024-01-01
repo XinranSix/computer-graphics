@@ -16,19 +16,13 @@ namespace ht {
 
     void GLFWWindowWrapper::run() {
         while (!glfwWindowShouldClose(window)) {
+            glClearColor(backgroundColor[0], backgroundColor[1],
+                         backgroundColor[2], backgroundColor[3]);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             // 处理输入事件
             glfwPollEvents();
-            // 渲染纹理
-            // texture.Bind();
             // 在这里添加你的OpenGL渲染代码，例如绘制一个三角形
-            // glClearColor(
-            //     windowState.background_color[0],
-            //     windowState.background_color[1],
-            //     windowState.background_color[2],
-            //     windowState.background_color[3]);
-            // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            // 渲染ImGui
-            // imguiRenderer->Render();
+
             // 交换缓冲区和检查事件
             glfwSwapBuffers(window);
             glfwPollEvents();
@@ -56,16 +50,12 @@ namespace ht {
         glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
     }
 
-    /**
-     * @brief 创建 GLFWwindow，并初始化 glad
-     */
     void GLFWWindowWrapper::createWindow() {
         window =
             glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
         if (window == nullptr) {
             HT_CONSOLE_ERROE("Failed to create GLFW window");
             glfwTerminate();
-            // std::exit(EXIT_FAILURE);
             throw ht::LocationException { "Failed to create GLFW window" };
         }
         glfwMakeContextCurrent(window);
@@ -77,8 +67,6 @@ namespace ht {
             glfwTerminate();
             throw ht::LocationException { "Failed to initialize GLAD" };
         }
-
-        // imguiRenderer = std::make_unique<ImGuiRenderer>(window);
     }
 
     void GLFWWindowWrapper::ErrorCallback(int error, const char *description) {

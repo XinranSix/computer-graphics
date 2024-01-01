@@ -13,10 +13,6 @@ namespace ht {
         virtual ~ImGuiRenderer();
         virtual void Render();
 
-    private:
-        // unsigned int framebuffer;
-        // unsigned int textureColorbuffer;
-
     protected:
         GLFWWindowWrapper *window;
     };

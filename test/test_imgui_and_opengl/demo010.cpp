@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[]) {
     ht::Log::init();
-    ht::GLFWWindowWithImGuiWrapper window { 800, 600, "OPengl" };
+    ht::GLFWWindowWithImGuiWrapper window { 800, 600, "OpenGL" };
     window.setImGuiRender(new ht::ImGuiConfigRenderer { &window });
     window.init();
     window.run();
