@@ -73,6 +73,7 @@ add_requires("jsoncons") -- A C++, header-only library for constructing JSON and
 
 -- GUI 和 TUI
 add_requires("wxwidgets") -- Cross-Platform C++ GUI Library
+add_requires("sfml") -- 
 
 -- 命令行解析库
 add_requires("gflags") 
@@ -82,4 +83,9 @@ add_requires("cxxopts")
 add_requires("icu4c") -- C/C++ libraries for Unicode and globalization.
 add_requires("libevent") -- 事件库
 add_requires("box2d") -- 
+
+-- 并行与 SIMD
+add_requires("onetbb") -- 
+add_requires("openmp") -- 
+
 

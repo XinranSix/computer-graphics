@@ -1,20 +1,24 @@
-template <typename Derived>
-class Base {
-public:
-    void foo() {
-        static_cast<Derived *>(this)->fooImpl(); // 调用派生类的实现
-    }
-};
-
-class Derived : public Base<Derived> {
-public:
-    void fooImpl() {
-        // 派生类的具体实现
-    }
-};
+#include <iostream>
+#include <vector>
+#include <omp.h>
 
 int main() {
-    Derived obj;
-    obj.foo(); // 调用基类的函数，实际上会调用派生类的实现
+    const int n = 1000;
+    std::vector<int> data(n);
+
+    // 初始化数组
+    for (int i = 0; i < n; ++i) {
+        data[i] = i + 1;
+    }
+
+    int sum = 0;
+
+#pragma omp parallel for reduction(+ : sum)
+    for (int i = 0; i < n; ++i) {
+        sum += data[i];
+    }
+
+    std::cout << "Sum: " << sum << std::endl;
+
     return 0;
 }
