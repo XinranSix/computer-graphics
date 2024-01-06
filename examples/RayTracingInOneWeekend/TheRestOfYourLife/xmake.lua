@@ -11,8 +11,19 @@ target('estimate_of_pi')
 
 target('integrate_x_sq')
     add_files("./integrate_x_sq.cpp")
-    
 
+target('estimate_halfway')
+    add_files("./estimate_halfway.cpp")
+
+target('sphere_importance')
+    add_files("./sphere_importance.cpp")
+    
+target('cos_density')
+    add_files("./cos_density.cpp")
+
+target('cos_cubed')
+    add_files("./cos_cubed.cpp")
+    
 
 
 

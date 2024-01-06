@@ -1,6 +1,5 @@
 includes("test_fast_io")
 includes("test_others")
-includes("test_matplotplusplus")
 includes("test_magic_enum")
 includes("test_libigl")
 includes("test_catch2")

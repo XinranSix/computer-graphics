@@ -4,6 +4,7 @@
 #include <string>
 
 namespace ht {
+    /// @brief
     class Image {
     public:
         enum class ImageFormat { PNG, BMP, JPG, Unknown };

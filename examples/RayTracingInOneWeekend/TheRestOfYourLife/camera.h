@@ -1,10 +1,12 @@
 #pragma once
 
 #include "rtweekend.h"
+#include "pdf.h"
 
 #include "color.h"
 #include "hittable.h"
 #include <cmath>
+#include <memory>
 #include <sstream>
 #include <fstream>
 #include "material.h"
@@ -27,7 +29,7 @@ public:
         10
     }; // Distance from camera lookfrom point to plane of perfect focus
 
-    void render(const hittable &world) {
+    void render(const hittable &world, const hittable &lights) {
         initialize();
 
         std::ofstream ofs { "./image.ppm" };
@@ -43,7 +45,7 @@ public:
                 for (int s_j {}; s_j < sqrt_spp; ++s_j) {
                     for (int s_i {}; s_i < sqrt_spp; ++s_i) {
                         ray r { get_ray(i, j, s_i, s_j) };
-                        pixel_color += ray_color(r, max_depth, world);
+                        pixel_color += ray_color(r, max_depth, world, lights);
                     }
                 }
                 write_color(oss, pixel_color, samples_per_pixel);
@@ -155,7 +157,8 @@ private:
         return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
     }
 
-    color ray_color(const ray &r, int depth, const hittable &world) {
+    color ray_color(const ray &r, int depth, const hittable &world,
+                    const hittable &lights) const {
         hit_record rec {};
 
         // If we've exceeded the ray bounce limit, no more light is gathered.
@@ -168,16 +171,31 @@ private:
             return background;
         }
 
-        ray scattered;
-        color attenuation;
-        color color_from_emission { rec.mat->emitted(rec.u, rec.v, rec.p) };
+        scatter_record srec {};
+        auto color_from_emission { rec.mat->emitted(r, rec, rec.u, rec.v,
+                                                    rec.p) };
 
-        if (!rec.mat->scatter(r, rec, attenuation, scattered)) {
+        if (!rec.mat->scatter(r, rec, srec)) {
             return color_from_emission;
         }
 
-        auto color_from_scatter { attenuation *
-                                  ray_color(scattered, depth - 1, world) };
+        if (srec.skip_pdf) {
+            return srec.attenuation *
+                   ray_color(srec.skip_pdf_ray, depth - 1, world, lights);
+        }
+
+        auto light_ptr { std::make_shared<hittable_pdf>(lights, rec.p) };
+        mixture_pdf p { light_ptr, srec.pdf_ptr };
+
+        ray scattered { rec.p, p.generate(), r.time() };
+        auto pdf_val { p.value(scattered.direction()) };
+
+        auto scattering_pdf { rec.mat->scattering_pdf(r, rec, scattered) };
+
+        auto sample_color { ray_color(scattered, depth - 1, world, lights) };
+        auto color_from_scatter {
+            (srec.attenuation * scattering_pdf * sample_color) / pdf_val
+        };
 
         return color_from_emission + color_from_scatter;
     }

@@ -40,6 +40,22 @@ public:
         return hit_anything;
     }
 
+    double pdf_value(const point3 &o, const vec3 &v) const override {
+        auto weight { 1.0 / objects.size() };
+        double sum {};
+
+        for (const auto &object : objects) {
+            sum += weight * object->pdf_value(o, v);
+        }
+
+        return sum;
+    }
+
+    vec3 random(const vec3 &o) const override {
+        auto int_size { static_cast<int>(objects.size()) };
+        return objects[random_int(0, int_size - 1)]->random(o);
+    }
+
     aabb bounding_box() const override {
         return bbox;
     }
