@@ -1,6 +1,11 @@
-#include <iostream>
+#include "sb7.h"
 
-int main(int argc, char *argv[]) {
-    std::cout << "Hello World" << std::endl;
-    return 0;
-}
+class my_appliction : public sb7::application {
+public:
+    void render(double currentTime) override {
+        static const GLfloat red[] { 1.0f, 0.0f, 0.0f, 1.0f };
+        glClearBufferfv(GL_COLOR, 0, red);
+    }
+};
+
+DECLARE_MAIN(my_appliction);

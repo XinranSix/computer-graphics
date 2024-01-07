@@ -91,8 +91,7 @@ public:
     }
 
     vec3 random(const point3 &origin) const override {
-        auto p = plane_origin + (random_double() * axis_A) +
-                 (random_double() * axis_B);
+        auto p = Q + (random_double() * u) + (random_double() * v);
         return p - origin;
     }
 
