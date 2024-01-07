@@ -10,7 +10,7 @@ target('sb7')
 for _, filepath in ipairs(os.files("./src/**.cpp")) do
 target('sb7_' .. path.basename(filepath))
     add_files(filepath)
-    add_packages("glfw")
+    add_packages("glfw", "glm")
     add_deps("sb7")
     add_defines("WIN32", "_WINDOWS")
     after_build(function (target)
