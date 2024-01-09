@@ -32,7 +32,7 @@ public:
         glNamedBufferStorage(buffer, sizeof(vertices), vertices,
                              GL_MAP_WRITE_BIT);
 
-        glVertexArrayVertexBuffer(vao, 0, buffer, 0, sizeof(GLfloat) * 6);
+        glVertexArrayVertexBuffer(vao, 0, buffer, 0, sizeof(vertex));
 
         glEnableVertexArrayAttrib(vao, 0);
         glVertexArrayAttribBinding(vao, 0, 0);

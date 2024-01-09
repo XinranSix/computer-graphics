@@ -10,8 +10,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "shader/shader.h"
-#include "model/model.h"
+
 #include "image/image.h"
 
 #include <iostream>
@@ -36,7 +35,6 @@ private:
 private:
     GLFWwindow *window;
 };
-
 
 // class Window {}
 
@@ -98,8 +96,6 @@ private:
     std::unique_ptr<ht::Image> image;
     std::tuple<int, int> textureSize;
 };
-
-
 
 WindowState windowState;
 
