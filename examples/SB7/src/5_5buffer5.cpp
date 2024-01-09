@@ -1,34 +1,68 @@
 #include "sb7.h"
 #include <cmath>
+#include <cstring>
 
 class my_appliction : public sb7::application {
 public:
     void startup() override {
-        rendering_program = compile_shaders();
-        glCreateVertexArrays(1, &vertex_array_object);
-        glBindVertexArray(vertex_array_object);
+        program = compile_shaders();
+        glUseProgram(program);
+
+        glCreateVertexArrays(1, &vao);
+
+        static const GLfloat positions[] {
+            0.25,  -0.25, 0.5, //
+            -0.25, -0.25, 0.5, //
+            0.25,  0.25,  0.5  //
+        };
+
+        static const GLfloat colors[] {
+            1.0, 0.0, 0.0, //
+            0.0, 1.0, 0.0, //
+            0.0, 0.0, 1.0  //
+        };
+
+        GLuint buffer[2];
+
+        glCreateBuffers(2, buffer);
+
+        glNamedBufferStorage(buffer[0], sizeof(positions), positions,
+                             GL_MAP_WRITE_BIT);
+        glNamedBufferStorage(buffer[1], sizeof(colors), colors,
+                             GL_MAP_WRITE_BIT);
+
+        glVertexArrayVertexBuffer(vao, 0, buffer[0], 0, sizeof(GLfloat) * 3);
+        glVertexArrayVertexBuffer(vao, 1, buffer[1], 0, sizeof(GLfloat) * 3);
+
+        glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribFormat(vao, 1, 3, GL_FLOAT, GL_FALSE, 0);
+
+        glVertexArrayAttribBinding(vao, 0, 0);
+        glVertexArrayAttribBinding(vao, 1, 1);
+
+        glEnableVertexArrayAttrib(vao, 0);
+        glEnableVertexArrayAttrib(vao, 1);
+
+        glBindVertexArray(vao);
     }
 
     void render(double currentTime) override {
-        const GLfloat color[] {
-            static_cast<float>(std::sin(currentTime) * 0.5f + 0.5f),
-            static_cast<float>(std::cos(currentTime) * 0.5f + 0.5f), 0.0f, 1.0f
-        };
+        const GLfloat color[] { 0.7137f, 0.7333f, 0.7686f, 1.0f };
         glClearBufferfv(GL_COLOR, 0, color);
 
-        glUseProgram(rendering_program);
+        glUseProgram(program);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 
     void shutdown() override {
-        glDeleteVertexArrays(1, &vertex_array_object);
-        glDeleteProgram(rendering_program);
+        glDeleteVertexArrays(1, &program);
+        glDeleteProgram(program);
     }
 
 private:
-    GLuint rendering_program;
-    GLuint vertex_array_object;
+    GLuint program;
+    GLuint vao;
 
 private:
     GLuint compile_shaders() {
@@ -40,24 +74,14 @@ private:
         static const GLchar *vertex_shader_source[] { R"(
             #version 450 core
 
-            out vec4 vs_color;
+            layout (location = 0) in vec3 position;
+            layout (location = 1) in vec3 color;
+
+            out vec3 vs_color;
 
             void main() {
-                const vec4 vertices[3] = vec4[3](
-                    vec4( 0.25, -0.25, 0.5, 1.0),
-                    vec4(-0.25, -0.25, 0.5, 1.0),
-                    vec4( 0.25,  0.25, 0.5, 1.0)
-                );
-
-                const vec4 colors[3] = vec4[3](
-                    vec4(1.0, 0.0, 0.0, 1.0),
-                    vec4(0.0, 1.0, 0.0, 1.0),
-                    vec4(0.0, 0.0, 1.0, 1.0)
-                );
-
-                gl_Position = vertices[gl_VertexID];
-
-                vs_color = colors[gl_VertexID];
+                gl_Position = vec4(position, 1.0);
+                vs_color = color;
             }
         )" };
 
@@ -66,12 +90,12 @@ private:
             R"(
                 #version 450 core
 
-                in vec4 vs_color;
+                in vec3 vs_color;
 
                 out vec4 color;
 
                 void main() {
-                    color = vs_color;
+                    color = vec4(vs_color, 1.0);
                 }
             )"
         };
