@@ -1,4 +1,5 @@
 #include "sb7.h"
+
 #include <cmath>
 #include <cstring>
 
@@ -29,14 +30,10 @@ public:
         glEnableVertexArrayAttrib(vao, 0);
 
         glVertexArrayAttribBinding(vao, 1, 0);
-        glVertexArrayAttribFormat(vao, 1, 4, GL_FLOAT, GL_FALSE,
-                                  sizeof(GLfloat) * 4);
+        glVertexArrayAttribFormat(vao, 1, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4);
         glEnableVertexArrayAttrib(vao, 1);
 
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
-
-      
-
     }
 
     void render(double currentTime) override {

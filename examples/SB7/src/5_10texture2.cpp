@@ -1,40 +1,18 @@
-/*
- * Copyright � 2012-2015 Graham Sellers
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice (including the next
- * paragraph) shall be included in all copies or substantial portions of the
- * Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
 #include <sb7.h>
 #include <vmath.h>
 
 #include <object.h>
 #include <shader.h>
 #include <sb7ktx.h>
+#include <iostream>
 
-class simpletexcoords_app : public sb7::application {
+class my_appliction : public sb7::application {
 public:
-    simpletexcoords_app() : render_prog(0), tex_index(0) {
+    my_appliction() : render_prog { 0 }, tex_index { 0 } {
     }
 
 protected:
-    void init() {
+    void init() override {
         static const char title[] = "OpenGL SuperBible - Texture Coordinates";
 
         sb7::application::init();
@@ -42,7 +20,7 @@ protected:
         memcpy(info.title, title, sizeof(title));
     }
 
-    virtual void startup() {
+    void startup() override {
 #define B 0x00, 0x00, 0x00, 0x00
 #define W 0xFF, 0xFF, 0xFF, 0xFF
         static const GLubyte tex_data[] = {
@@ -70,17 +48,16 @@ protected:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        tex_object[1] = sb7::ktx::file::load("media/textures/pattern1.ktx");
+        tex_object[1] = sb7::ktx::file::load("asset/sb7/textures/pattern1.ktx");
+        object.load("asset/sb7/objects/torus_nrms_tc.sbm");
 
-        object.load("media/objects/torus_nrms_tc.sbm");
-
-        load_shaders();
+        loadShaders();
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
     }
 
-    virtual void render(double currentTime) {
+    void render(double currentTime) override {
         static const GLfloat gray[] = { 0.2f, 0.2f, 0.2f, 1.0f };
         static const GLfloat ones[] = { 1.0f };
 
@@ -107,39 +84,109 @@ protected:
         object.render();
     }
 
-    virtual void shutdown() {
+    void shutdown() override {
         glDeleteProgram(render_prog);
         glDeleteTextures(2, tex_object);
     }
 
-    void load_shaders() {
+private:
+    void loadShaders() {
+        // Source code for vertex shader
+        static const GLchar *vertex_shader_source[] { R"(
+               #version 450 core
+
+               uniform mat4 mv_matrix;
+               uniform mat4 proj_matrix;
+
+               layout (location = 0) in vec4 position;
+               layout (location = 4) in vec2 tc;
+
+               out VS_OUT {
+                   vec2 tc;
+               } vs_out;
+
+               void main() {
+                   vec4 pos_vs = mv_matrix * position;
+                   vs_out.tc = tc;
+                   gl_Position = proj_matrix * pos_vs;
+               }
+           )" };
+
+        // Source code for fragment shader
+        static const GLchar *fragment_shader_source[] {
+            R"(
+           #version 450 core
+
+           layout (binding = 0) uniform sampler2D tex_object;
+
+           in VS_OUT {
+               vec2 tc;
+           } fs_in;
+           
+            out vec4 color;
+
+           void main() {
+               color = texture(tex_object, fs_in.tc * vec2(3.0, 1.0));
+           }
+          )"
+        };
+
         if (render_prog)
             glDeleteProgram(render_prog);
 
-        GLuint vs, fs;
+        GLuint vertex_shader;
+        GLuint fragment_shader;
 
-        vs = sb7::shader::load("media/shaders/simpletexcoords/render.vs.glsl",
-                               GL_VERTEX_SHADER);
-        fs = sb7::shader::load("media/shaders/simpletexcoords/render.fs.glsl",
-                               GL_FRAGMENT_SHADER);
+        // Create and compile vertex shader
+        vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertex_shader, 1, vertex_shader_source, nullptr);
+        glCompileShader(vertex_shader);
+        int success;
+        char infoLog[512];
+        glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            glGetShaderInfoLog(vertex_shader, 512, nullptr, infoLog);
+            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+                      << infoLog << std::endl;
+        }
 
+        // Create and compile fragment shader
+        fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragment_shader, 1, fragment_shader_source, nullptr);
+        glCompileShader(fragment_shader);
+        glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            glGetShaderInfoLog(fragment_shader, 512, nullptr, infoLog);
+            std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
+                      << infoLog << std::endl;
+        }
+
+        // Create program, attach shaders to it, and link it
         render_prog = glCreateProgram();
-        glAttachShader(render_prog, vs);
-        glAttachShader(render_prog, fs);
+        glAttachShader(render_prog, vertex_shader);
+        glAttachShader(render_prog, fragment_shader);
         glLinkProgram(render_prog);
+        glGetProgramiv(render_prog, GL_LINK_STATUS, &success);
+        if (!success) {
+            glGetProgramInfoLog(render_prog, 512, nullptr, infoLog);
+            std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
+                      << infoLog << std::endl;
+        }
 
-        glDeleteShader(vs);
-        glDeleteShader(fs);
+        // Delete the shaders as the program has them now
+        glDeleteShader(vertex_shader);
+        glDeleteShader(fragment_shader);
 
         uniforms.mv_matrix = glGetUniformLocation(render_prog, "mv_matrix");
         uniforms.proj_matrix = glGetUniformLocation(render_prog, "proj_matrix");
     }
 
-    virtual void onKey(int key, int action) {
+private:
+    virtual void onKey(int key, int action) override {
         if (action) {
             switch (key) {
             case 'R':
-                load_shaders();
+                loadShaders();
                 break;
             case 'T':
                 tex_index++;
@@ -164,4 +211,4 @@ protected:
     sb7::object object;
 };
 
-DECLARE_MAIN(simpletexcoords_app)
+DECLARE_MAIN(my_appliction);

@@ -1,44 +1,35 @@
-#ifndef __SHADER_H__
-#define __SHADER_H__
+#pragma once
+namespace sb7 {
 
-namespace sb7
-{
+    namespace shader {
 
-namespace shader
-{
-
-GLuint load(const char * filename,
-            GLenum shader_type = GL_FRAGMENT_SHADER,
+        GLuint load(const char *filename,
+                    GLenum shader_type = GL_FRAGMENT_SHADER,
 #ifdef _DEBUG
-            bool check_errors = true);
+                    bool check_errors = true);
 #else
-            bool check_errors = false);
+                    bool check_errors = false);
 #endif
 
-GLuint from_string(const char * source,
-                   GLenum shader_type,
+        GLuint from_string(const char *source, GLenum shader_type,
 #ifdef _DEBUG
-                   bool check_errors = true);
+                           bool check_errors = true);
 #else
-                   bool check_errors = false);
+                           bool check_errors = false);
 #endif
 
-}
+    } // namespace shader
 
-namespace program
-{
+    namespace program {
 
-GLuint link_from_shaders(const GLuint * shaders,
-                         int shader_count,
-                         bool delete_shaders,
+        GLuint link_from_shaders(const GLuint *shaders, int shader_count,
+                                 bool delete_shaders,
 #ifdef _DEBUG
-                         bool check_errors = true);
+                                 bool check_errors = true);
 #else
-                         bool check_errors = false);
+                                 bool check_errors = false);
 #endif
 
-}
+    } // namespace program
 
-}
-
-#endif /* __SHADER_H__ */
+} // namespace sb7

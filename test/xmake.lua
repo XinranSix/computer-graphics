@@ -11,4 +11,8 @@ includes("test_boost")
 includes("test_opencv")
 includes("test_spdlog")
 includes("test_tbb")
-includes("sb7_examples")
+
+
+if is_plat("windows") then
+    includes("sb7_examples")
+end

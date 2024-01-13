@@ -1,27 +1,27 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+// clang-format off
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
+// clang-format on
 
 #include <iostream>
 #include <string>
 
-int main(int argc, char *argv[]) {
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
+
+int main(int argc, char *argv[]) {
 #pragma region glfw init
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window { glfwCreateWindow(1080, 960, "title", nullptr,
-                                          nullptr) };
+    GLFWwindow *window{glfwCreateWindow(1080, 960, "title", nullptr, nullptr)};
     if (window == nullptr) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -93,16 +93,15 @@ int main(int argc, char *argv[]) {
 
 #pragma endregion
 
-    float background_color[] { 0.7137f, 0.7333f, 0.7686f, 1.0f };
+    float background_color[]{0.7137f, 0.7333f, 0.7686f, 1.0f};
 
-    std::string text { "asv" };
-    char text_box[100] { "Text Box" };
+    std::string text{"asv"};
+    char text_box[100]{"Text Box"};
     ImVec4 color;
 
 #pragma region loop
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(background_color[0], background_color[1],
-                     background_color[2], background_color[3]);
+        glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_NewFrame();
@@ -135,8 +134,7 @@ int main(int argc, char *argv[]) {
         ImGui::NewLine();
         ImGui::BeginListBox("List Box");
         for (int i = 0; i < 100; ++i) {
-            if (ImGui::Selectable(std::to_string(i).c_str(),
-                                  std::to_string(i) == text)) {
+            if (ImGui::Selectable(std::to_string(i).c_str(), std::to_string(i) == text)) {
                 text = std::to_string(i);
             }
         }

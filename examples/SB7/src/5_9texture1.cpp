@@ -1,19 +1,20 @@
-#include "sb7.h"
-#include "vmath.h"
 #include <iostream>
 
+#include "sb7.h"
+#include "vmath.h"
+
+
 class my_appliction : public sb7::application {
-public:
+   public:
     void startup() override {
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexStorage2D(GL_TEXTURE_2D, 8, GL_RGBA32F, 256, 256);
 
-        float *data { new float[256 * 256 * 4] };
+        float *data{new float[256 * 256 * 4]};
         generate_texture(data, 256, 256);
 
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 256, GL_RGBA, GL_FLOAT,
-                        data);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 256, GL_RGBA, GL_FLOAT, data);
 
         delete[] data;
 
@@ -25,7 +26,7 @@ public:
     }
 
     void render(double currentTime) override {
-        static const GLfloat green[] = { 0.0f, 0.25f, 0.0f, 1.0f };
+        static const GLfloat green[] = {0.0f, 0.25f, 0.0f, 1.0f};
         glClearBufferfv(GL_COLOR, 0, green);
 
         glUseProgram(program);
@@ -37,14 +38,14 @@ public:
         glDeleteProgram(program);
     }
 
-private:
+   private:
     GLuint compile_shaders() {
         GLuint vertex_shader;
         GLuint fragment_shader;
         GLuint program;
 
         // Source code for vertex shader
-        static const GLchar *vertex_shader_source[] { R"(
+        static const GLchar *vertex_shader_source[]{R"(
             #version 450 core
 
             void main() {
@@ -56,10 +57,10 @@ private:
 
                 gl_Position = vertices[gl_VertexID];
             }
-        )" };
+        )"};
 
         // Source code for fragment shader
-        static const GLchar *fragment_shader_source[] {
+        static const GLchar *fragment_shader_source[]{
             R"(
                 #version 450 core
 
@@ -70,8 +71,7 @@ private:
                 void main() {
                     color = texture(s, gl_FragCoord.xy / textureSize(s, 0));   
                 }
-            )"
-        };
+            )"};
 
         // Create and compile vertex shader
         vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -82,8 +82,7 @@ private:
         glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(vertex_shader, 512, nullptr, infoLog);
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-                      << infoLog << std::endl;
+            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
         }
 
         // Create and compile fragment shader
@@ -93,8 +92,7 @@ private:
         glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(fragment_shader, 512, nullptr, infoLog);
-            std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-                      << infoLog << std::endl;
+            std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
         }
 
         // Create program, attach shaders to it, and link it
@@ -105,8 +103,7 @@ private:
         glGetProgramiv(program, GL_LINK_STATUS, &success);
         if (!success) {
             glGetProgramInfoLog(program, 512, nullptr, infoLog);
-            std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-                      << infoLog << std::endl;
+            std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
         }
 
         // Delete the shaders as the program has them now
@@ -116,22 +113,19 @@ private:
         return program;
     }
 
-private:
+   private:
     void generate_texture(float *data, int width, int height) {
-        for (int y {}; y < height; ++y) {
-            for (int x {}; x < width; ++x) {
-                data[(y * width + x) * 4 + 0] =
-                    (float)((x & y) & 0xFF) / 255.0f;
-                data[(y * width + x) * 4 + 1] =
-                    (float)((x | y) & 0xFF) / 255.0f;
-                data[(y * width + x) * 4 + 2] =
-                    (float)((x ^ y) & 0xFF) / 255.0f;
+        for (int y{}; y < height; ++y) {
+            for (int x{}; x < width; ++x) {
+                data[(y * width + x) * 4 + 0] = (float)((x & y) & 0xFF) / 255.0f;
+                data[(y * width + x) * 4 + 1] = (float)((x | y) & 0xFF) / 255.0f;
+                data[(y * width + x) * 4 + 2] = (float)((x ^ y) & 0xFF) / 255.0f;
                 data[(y * width + x) * 4 + 3] = 1.0f;
             }
         }
     }
 
-private:
+   private:
     GLuint texture;
     GLuint program;
     GLuint vao;
