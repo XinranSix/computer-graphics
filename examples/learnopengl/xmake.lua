@@ -1,7 +1,15 @@
-includes("chapter1")
-includes("chapter2")
--- includes("chapter3")
--- includes("chapter4")
--- includes("chapter5")
--- includes("chapter6")
--- includes("chapter7")
+if is_plat("windows") then
+    add_cxflags("/utf-8")
+end
+
+add_includedirs("include")
+
+for _, filepath in ipairs(os.files("./src/**.cpp")) do
+target('learnopengl_' .. path.basename(filepath))
+    add_files(filepath)
+    add_packages("glad", "glm", "assimp", "stb", "spdlog", "glfw", "magic_enum")
+    add_deps("imgui")
+    after_build(function (target)
+        os.cp("$(projectdir)/asset", target:targetdir())
+    end)
+end

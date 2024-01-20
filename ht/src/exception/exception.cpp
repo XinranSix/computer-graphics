@@ -6,8 +6,7 @@
 
 namespace ht {
 
-    LocationException::LocationException(std::string message,
-                                         std::source_location location)
+    LocationException::LocationException(std::string message, std::source_location location)
         : message { std::move(message) }, location { std::move(location) } {
     }
 

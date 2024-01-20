@@ -1,1 +1,0 @@
-includes("1.2.hello_window_clear")

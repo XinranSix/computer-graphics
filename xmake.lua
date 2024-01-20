@@ -1,7 +1,7 @@
 set_project("computer-graphics")
 set_version("1.0.0")
 
-add_rules("mode.debug", "mode.release")
+add_rules("mode.debug", "mode.release", "mode.releasedbg", "mode.minsizerel", "mode.check", "mode.profile", "mode.coverage", "mode.valgrind", "mode.asan", "mode.tsan", "mode.lsan", "mode.ubsan")
 
 set_languages("c++23")
 

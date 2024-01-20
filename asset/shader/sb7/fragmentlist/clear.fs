@@ -1,6 +1,6 @@
 #version 450 core
 
-layout (binding = 0, r32ui) coherent uniform uimage2D head_pointer;
+layout(binding = 0, r32ui) coherent uniform uimage2D head_pointer;
 
 void main() {
     ivec2 P = ivec2(gl_FragCoord.xy);
