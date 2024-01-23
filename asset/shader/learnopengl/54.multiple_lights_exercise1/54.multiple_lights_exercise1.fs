@@ -40,6 +40,7 @@ struct SpotLight {
     
     vec3 ambient;
     vec3 diffuse;
+    // sampler2D diffuse;
     vec3 specular;       
 };
 
@@ -48,16 +49,19 @@ uniform Material material;
 uniform DirLight dirLight;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform SpotLight spotLight;
+uniform sampler2D spotlightMap;
 
 out vec4 FragColor;
 
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
+in vec4 View;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+
 
 void main() {
 
@@ -75,6 +79,13 @@ void main() {
     // 第三阶段：聚光
     result += CalcSpotLight(spotLight, norm, FragPos, viewDir);    
 
+  /*   // 第四阶段：贴图
+    vec2 texcoord = normalize(View.xyz).xy;
+    vec3 spotdiffuse = texture(spotlightMap, (texcoord.xy ) / 0.5 + 0.5).rgb ;
+    // spotdiffuse *= attenuation * intensity;
+    result += spotdiffuse;
+    
+ */
     FragColor = vec4(result, 1.0);
 }
 
@@ -113,7 +124,6 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     return (ambient + diffuse + specular);
 }
 
-
 // calculates the color when using a spot light.
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fragPos);
@@ -132,9 +142,13 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     // combine results
     vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
     vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
+    // vec3 diffuse = vec3(texture(light.diffuse, View.xy)) * diff * vec3(texture(material.diffuse, TexCoords));
+    // vec3 diffuse = vec3(texture(light.diffuse, vec2(View.x + 0.5, View.y + 0.5))) * vec3(texture(material.diffuse, TexCoords));
     vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+    vec3 emm = vec3(texture(spotlightMap, vec2(View.x + 0.5, View.y + 0.5)));
+    emm *= intensity;
     ambient *= attenuation * intensity;
     diffuse *= attenuation * intensity;
     specular *= attenuation * intensity;
-    return (ambient + diffuse + specular);
+    return (ambient + diffuse + specular + emm);
 }

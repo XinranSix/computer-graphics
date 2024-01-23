@@ -28,6 +28,6 @@ includes("ht")
 includes("package.lua")
 
 target("imgui")
-    add_files("./extern/imgui/**.cpp")
+    add_files("./imgui/**.cpp")
     set_kind("static")
     add_packages("glfw", "glad", "stb", "dirent")

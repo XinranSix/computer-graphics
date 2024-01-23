@@ -277,12 +277,15 @@ int main(int argc, char *argv[]) {
 #pragma region texture
     unsigned int diffuseMap = loadTexture("asset/texture/container2.png");
     unsigned int specularMap = loadTexture("asset/texture/container2_specular.png");
+    unsigned int spotlightMap = loadTexture("asset/texture/yy.png");
 
     // shader configuration
     // --------------------
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
+    lightingShader.setInt("spotlightMap", 2);
+    // lightingShader.setInt("spotLight.diffuse", 2);
 
 #pragma endregion
 
@@ -356,6 +359,8 @@ int main(int argc, char *argv[]) {
             glBindTexture(GL_TEXTURE_2D, diffuseMap);
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, specularMap);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, spotlightMap);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
@@ -497,6 +502,7 @@ unsigned int loadTexture(char const *path) {
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
+    stbi_set_flip_vertically_on_load(true);
     int width, height, nrComponents;
     unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
     if (data) {
