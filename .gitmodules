@@ -7,3 +7,6 @@
 [submodule "extern/progress-cpp"]
 	path = extern/progress-cpp
 	url = https://github.com/prakhar1989/progress-cpp.git
+[submodule "extern/ImGuiFileDialog"]
+	path = extern/ImGuiFileDialog
+	url = https://github.com/aiekick/ImGuiFileDialog.git
