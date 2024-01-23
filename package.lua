@@ -85,6 +85,7 @@ add_requires("cxxopts")
 
 -- 其他库
 add_requires("box2d") -- 
+add_requires("dirent") -- 
 
 -- 并行与 SIMD
 add_requires("onetbb") -- 

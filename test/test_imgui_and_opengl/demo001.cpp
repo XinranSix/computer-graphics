@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window{glfwCreateWindow(1080, 960, "title", nullptr, nullptr)};
+    GLFWwindow *window { glfwCreateWindow(1080, 960, "title", nullptr, nullptr) };
     if (window == nullptr) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -93,12 +93,16 @@ int main(int argc, char *argv[]) {
 
 #pragma endregion
 
-    float background_color[]{0.7137f, 0.7333f, 0.7686f, 1.0f};
+    float background_color[] { 0.7137f, 0.7333f, 0.7686f, 1.0f };
 
-    std::string text{"asv"};
-    char text_box[100]{"Text Box"};
+    std::string text { "asv" };
+    char text_box[100] { "Text Box" };
     ImVec4 color;
 
+    float f1 { 1.0f };
+    float f2 { 1.4f };
+    float f3 { 1.4f };
+    float f4 { 1.4f };
 #pragma region loop
     while (!glfwWindowShouldClose(window)) {
         glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
@@ -148,6 +152,19 @@ int main(int argc, char *argv[]) {
             }
             ImGui::EndCombo();
         }
+
+
+        ImGui::PushID("Namespace1");
+        ImGui::DragFloat("float", &f1);
+        ImGui::DragFloat("float", &f3);
+        ImGui::PopID();
+
+
+        ImGui::PushID("Namespace2");
+        ImGui::DragFloat("float", &f2);
+        ImGui::DragFloat("float", &f4);
+        ImGui::PopID();
+
 
         ImGui::End();
 
