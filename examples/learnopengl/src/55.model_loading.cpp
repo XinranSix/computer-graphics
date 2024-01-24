@@ -25,8 +25,33 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 
 // 全局数据
-constexpr unsigned int SCR_WIDTH = 800;
-constexpr unsigned int SCR_HEIGHT = 600;
+
+struct DirLight {
+    glm::vec3 direction;
+
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};
+
+struct PointLight {
+    glm::vec3 position;
+
+    float constant;
+    float linear;
+    float quadratic;
+
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};
+
+void render_imgui_for_dir_light(std::string_view name, DirLight &dirLight);
+void render_imgui_for_point_light(std::string_view name, PointLight &pointLight);
+// void render_imgui_for_spot_light(std::string_view name, SpotLight &spotLight);
+
+constexpr unsigned int SCR_WIDTH = 1920;
+constexpr unsigned int SCR_HEIGHT = 1080;
 
 Camera camera { glm::vec3(0.0f, 0.0f, 3.0f) };
 float lastX { SCR_WIDTH / 2.0f };
@@ -85,11 +110,88 @@ int main(int argc, char *argv[]) {
 #pragma region shader
     Shader ourShader { "asset/shader/learnopengl/55.model_loading/55.model_loading.vs",
                        "asset/shader/learnopengl/55.model_loading/55.model_loading.fs" };
+    Shader lightCubeShader("asset/shader/learnopengl/55.model_loading/55.light_cube.vs",
+                           "asset/shader/learnopengl/55.model_loading/55.light_cube.fs");
 #pragma endregion
 
 #pragma region data_and_buffer
     float background_color[] { 0.1f, 0.1f, 0.1f, 1.0f };
     bool wire_mode { false };
+
+    GLfloat vertices[] = {
+        // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, //
+        0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 0.0f, //
+        0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f, //
+        0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f, //
+        -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 1.0f, //
+        -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, //
+
+        -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, //
+        0.5f,  -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f, //
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, //
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, //
+        -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f, //
+        -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, //
+
+        -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f, 0.0f, //
+        -0.5f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f,  1.0f, 1.0f, //
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f, 1.0f, //
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f, 1.0f, //
+        -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  0.0f, 0.0f, //
+        -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f, 0.0f, //
+
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, //
+        0.5f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f,  1.0f, 1.0f, //
+        0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f, //
+        0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f, //
+        0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, //
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, //
+
+        -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f, 1.0f, //
+        0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  1.0f, 1.0f, //
+        0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, //
+        0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, //
+        -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.0f, 0.0f, //
+        -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f, 1.0f, //
+
+        -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f, //
+        0.5f,  0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  1.0f, 1.0f, //
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, //
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, //
+        -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, //
+        -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f  //
+    };
+
+    DirLight dirLight { { -0.2f, -1.0f, -0.3f }, { 0.05f, 0.05f, 0.05f }, { 0.4f, 0.4f, 0.4f }, { 0.5f, 0.5f, 0.5f } };
+    PointLight pointLight[4] { { glm::vec3(0.7f, 0.2f, 2.0f),
+                                 1.0f,
+                                 0.09f,
+                                 0.032f,
+                                 { 0.05f, 0.05f, 0.05f },
+                                 { 0.8f, 0.8f, 0.8f },
+                                 { 1.0f, 1.0f, 1.0f } },
+                               { glm::vec3(2.3f, -3.3f, -4.0f),
+                                 1.0f,
+                                 0.09f,
+                                 0.032f,
+                                 { 0.05f, 0.05f, 0.05f },
+                                 { 0.8f, 0.8f, 0.8f },
+                                 { 1.0f, 1.0f, 1.0f } },
+                               { glm::vec3(-4.0f, 2.0f, -12.0f),
+                                 1.0f,
+                                 0.09f,
+                                 0.032f,
+                                 { 0.05f, 0.05f, 0.05f },
+                                 { 0.8f, 0.8f, 0.8f },
+                                 { 1.0f, 1.0f, 1.0f } },
+                               { glm::vec3(0.0f, 0.0f, -3.0f),
+                                 1.0f,
+                                 0.09f,
+                                 0.032f,
+                                 { 0.05f, 0.05f, 0.05f },
+                                 { 0.8f, 0.8f, 0.8f },
+                                 { 1.0f, 1.0f, 1.0f } } };
 
     Model ourModel1("asset/model/nanosuit/nanosuit.obj");
     // Model ourModel("c:/Users/yaojie/Desktop/untitled.obj");
@@ -97,11 +199,23 @@ int main(int argc, char *argv[]) {
     // Model ourModel("asset/model/dragon.off");
     Model ourModel3("asset/model/Xenoblade/Pneuma/pneuma.pmx"); // 小绿
     // Model ourModel("asset/model/bastion-ganymede-overwatch/source/Bastion_Final.obj");
+
+    GLuint VBO, lightCubeVAO;
+
+    glCreateVertexArrays(1, &lightCubeVAO);
+    glCreateBuffers(1, &VBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindVertexArray(lightCubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void *>(0));
+    glEnableVertexAttribArray(0);
 #pragma endregion
 
 #pragma region texture
 #pragma endregion
-
 
 #pragma region loop
     while (!glfwWindowShouldClose(window)) {
@@ -120,6 +234,27 @@ int main(int argc, char *argv[]) {
 
         glPolygonMode(GL_FRONT_AND_BACK, wire_mode ? GL_LINE : GL_FILL);
         ourShader.use();
+
+        {
+            ourShader.setVec3("viewPos", camera.Position);
+            // ourShader.setFloat("material.shininess", 32.0f);
+            // directional light
+            ourShader.setVec3("dirLight.direction", dirLight.direction);
+            ourShader.setVec3("dirLight.ambient", dirLight.ambient);
+            ourShader.setVec3("dirLight.diffuse", dirLight.diffuse);
+            ourShader.setVec3("dirLight.specular", dirLight.specular);
+            // point light
+            for (int i = 0; i < 4; ++i) {
+                ourShader.setVec3(std::format("pointLights[{}].position", i).c_str(), pointLight[i].position);
+                ourShader.setVec3(std::format("pointLights[{}].ambient", i).c_str(), pointLight[i].ambient);
+                ourShader.setVec3(std::format("pointLights[{}].diffuse", i).c_str(), pointLight[i].diffuse);
+                ourShader.setVec3(std::format("pointLights[{}].specular", i).c_str(), pointLight[i].specular);
+                ourShader.setFloat(std::format("pointLights[{}].constant", i).c_str(), pointLight[i].constant);
+                ourShader.setFloat(std::format("pointLights[{}].linear", i).c_str(), pointLight[i].linear);
+                ourShader.setFloat(std::format("pointLights[{}].quadratic", i).c_str(), pointLight[i].quadratic);
+            }
+        }
+
         // view/projection transformations
         glm::mat4 projection =
             glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -130,16 +265,34 @@ int main(int argc, char *argv[]) {
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         model =
-            glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+            glm::translate(model, glm::vec3(0.0f, 0.0f, -10.0f)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f)); // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
         ourModel1.Draw(ourShader);
-        model = glm::translate(model, glm::vec3(50.0f, 0.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(10.0f, 0.0f, 0.0f));
         ourShader.setMat4("model", model);
-        model = glm::translate(model, glm::vec3(50.0f, 0.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(30.0f, 0.0f, 0.0f));
         ourModel2.Draw(ourShader);
         ourShader.setMat4("model", model);
         ourModel3.Draw(ourShader);
+
+        { // also draw the lamp object(s)
+            lightCubeShader.use();
+            lightCubeShader.setMat4("projection", projection);
+            lightCubeShader.setMat4("view", view);
+
+            // we now draw as many light bulbs as we have point lights.
+            glBindVertexArray(lightCubeVAO);
+            for (unsigned int i = 0; i < 4; i++) {
+                auto model = glm::mat4(1.0f);
+                model = glm::translate(model, pointLight[i].position);
+                model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+                lightCubeShader.setMat4("model", model);
+                // lightCubeShader.setVec3("lightColor", lightColor);
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
+        }
+
 
 #pragma region imgui render
         ImGui_ImplOpenGL3_NewFrame();
@@ -151,6 +304,11 @@ int main(int argc, char *argv[]) {
         ImGui::ColorEdit4("background color", background_color);
         ImGui::Checkbox("Wire Mode", &wire_mode);
         ImGui::NewLine();
+        render_imgui_for_dir_light("dir light1", dirLight);
+        for (int i {}; i < 4; ++i) {
+            ImGui::NewLine();
+            render_imgui_for_point_light(std::format("point light{}", i), pointLight[i]);
+        }
 
         ImGui::End();
         ImGui::Render();
@@ -243,4 +401,27 @@ void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+void render_imgui_for_dir_light(std::string_view name, DirLight &dirLight) {
+    ImGui::PushID(name.data());
+    ImGui::Text("%s", name.data());
+    ImGui::DragFloat3("direction", glm::value_ptr(dirLight.direction));
+    ImGui::DragFloat3("ambient", glm::value_ptr(dirLight.ambient), 0.01, 0.0f, 1.0f);
+    ImGui::DragFloat3("diffuse", glm::value_ptr(dirLight.diffuse), 0.01, 0.0f, 1.0f);
+    ImGui::DragFloat3("specular", glm::value_ptr(dirLight.specular), 0.01, 0.0f, 1.0f);
+    ImGui::PopID();
+}
+
+void render_imgui_for_point_light(std::string_view name, PointLight &pointLight) {
+    ImGui::PushID(name.data());
+    ImGui::Text("%s", name.data());
+    ImGui::DragFloat3("position", glm::value_ptr(pointLight.position));
+    ImGui::DragFloat("constant", &pointLight.constant);
+    ImGui::DragFloat("linear", &pointLight.linear);
+    ImGui::DragFloat("quadratic", &pointLight.quadratic);
+    ImGui::DragFloat3("ambient", glm::value_ptr(pointLight.ambient), 0.01, 0.0f, 1.0f);
+    ImGui::DragFloat3("diffuse", glm::value_ptr(pointLight.diffuse), 0.01, 0.0f, 1.0f);
+    ImGui::DragFloat3("specular", glm::value_ptr(pointLight.specular), 0.01, 0.0f, 1.0f);
+    ImGui::PopID();
 }

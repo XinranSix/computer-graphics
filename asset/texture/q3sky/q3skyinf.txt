@@ -1,0 +1,84 @@
+Quake3Arena skybox collection.
+
+============================================================
+title:            NA
+file:             q3skyinf.zip
+author:           various (compilation by Speaker aka Laszlo Menczel)
+email address:    menczel AT invitel DOT hu
+URL:              http://menczel.extra.hu
+description:      A collection of 240 sky boxes for Q3A
+
+============================================================
+play information: NA
+
+tourney:          
+deathmatch:       
+team deathmatch:  
+CTF:              
+Bot File (aas):   
+other:            
+new sounds:       
+new graphics:
+new music:        
+
+how to play:      
+============================================================
+info
+
+This is a collection of 240 sky boxes I have found on the net.
+They were made by variuos authors (not by me) and have different
+licenses. All of them may be used in non-commercial projects,
+some of them may be distributed under the GNU General Public
+License version 2 (which allows even commercial use). The size
+of sky box textures is 512x512. Each sky box has a working Q3A
+shader.
+
+============================================================
+construction: NA
+
+base:           
+editor:         
+other progs:    
+know bugs:      
+build time:
+
+============================================================
+thanx to ...
+
+Grasshopper (member of the Nexuiz message board) for helping me
+in checking the licensing terms of the sky boxes.
+
+'The Mighty Pete' (http://www.petesoasis.com), Chris Matz (aka
+Amethyst7, http://amethyst7.gotdoofed.com) and Colin Lowndes
+(http://www.3delyvisions.com) who generously allowed to distribute
+their sky boxes under the GPL.
+
+LvL (http://lvlworld.com) for hosting the archive.
+
+============================================================
+Mirrors
+
+This archive is also maintained on my personal WEB site. It
+is organized in a way that allows fast downloading of individual
+sky boxes. You should first download an info archive at the
+following link:
+
+http://menczel.extra.hu/q3skyinf.zip
+
+In this info archive you will find a gallery (representative
+images from each sky box) and a table containing license info
+on the individual boxes.
+
+After you selected the box you want, it can be downloaded
+as a single ZIP file using the list at the following link:
+
+http://menczel.extra.hu/q3sky.html
+
+============================================================
+Distribution / Copyright / Permissions 
+
+See the table 'license.txt' in 'q3skyinf.zip', also the
+README files in the individual sky box archives.
+
+============================================================
+

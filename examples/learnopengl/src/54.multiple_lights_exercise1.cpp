@@ -31,7 +31,6 @@ unsigned int loadTexture(const char *path);
 
 
 // 全局数据
-
 struct DirLight {
     glm::vec3 direction;
 

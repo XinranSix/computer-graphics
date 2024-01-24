@@ -1,0 +1,71 @@
+Q3SKYINF.ZIP
+************
+
+Created by: Laszlo Menczel aka Speaker (menczel AT invitel DOT hu)
+Date:       12/28/2008
+
+This archive contains information on the sky boxes that I have collected
+from the net. The boxes are available for download at the following link:
+
+http://menczel.extra.hu/q3sky.html
+
+I hope that these sky boxes are going to be useful for mappers all around.
+If you have a nice skybox (made by you or downloaded) which is not yet in
+the collection, just let me know and I will include it if you wish.
+
+The folder 'gallery' contains a representative image for each sky box in
+the collection, The text file 'license.txt' contains a table in which the
+sky boxes together with their license type are listed in alphabetical order.
+
+DISCLAIMER
+**********
+
+These skyboxes have not been produced by me, I take no credit whatsoever
+for them. I have collected them together for convenience and made a few
+slight modifications / improvements.
+
+LICENSING
+*********
+
+I tried to determine the licensing terms for each sky box (by checking the
+accompanying READMEs and the authors' WEB sites). I have contacted some of
+the authors to ascertain the license terms. The boxes are divided into the
+following groups according to licenses:
+
+ambiquous ----> no clear license terms, but probably safe to use in
+                non-commercial projects
+             
+noncomm ------> free to use in non-commercial projects
+
+gpl ----------> may be freely used in any project and may be distributed
+                under the GNU General Public License version 2
+             
+unrestricted -> free to use in any way you can think of (just give proper
+                credit to the author)
+
+You can check the individual 'readme' files included in the separate
+skybox archives. If in doubt, connect the original author, provided that
+the e-mail is still valid which is not very likely :-(
+
+SHADER SUPPORT
+**************
+
+Each skybox has a working Q3A shader script. Some of these scripts were made
+by me because the corresponding original works did not include any. I have
+checked the sun's direction & elevation values in every single skybox in the
+archive and added the appropriate values to the shaders. I have not adjusted
+the color and intensity of the sun, you have to do it yourself.
+
+In a few cases it was impossible to identify an unambiquous light source (sun)
+in the skybox. in these cases I left the direction/elevation values at 0/90,
+you will have to set them to your preferences.
+
+I used a simple test map for checking the sun's settings. The MAP file and
+textures necessary to build this test map are in the folder 'skytest'. I also
+included a text file containing instructions on how to use the map. 
+
+ACKNOWLEDGEMENTS
+****************
+
+Thanks to Grasshopper (member of the Nexuiz message board at 'alientrap.org')
+for helping me in determining the licensing terms of the boxes.
