@@ -9,7 +9,5 @@ target('learnopengl_' .. path.basename(filepath))
     add_files(filepath)
     add_packages("glad", "glm", "assimp", "stb", "spdlog", "glfw", "magic_enum")
     add_deps("imgui")
-    after_build(function (target)
-        os.cp("$(projectdir)/asset", target:targetdir())
-    end)
+    set_rundir("$(projectdir)");
 end

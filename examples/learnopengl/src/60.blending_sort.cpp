@@ -83,57 +83,57 @@ int main(int argc, char *argv[]) {
 #pragma endregion
 
 #pragma region shader
-    Shader shader { "asset/shader/learnopengl/60.blending_sort/60.blending_sort.vs",
-                    "asset/shader/learnopengl/60.blending_sort/60.blending_sort.fs" };
+    Shader shader { "asset/shader/learnopengl/61.face_culling/61.face_culling.vs",
+                    "asset/shader/learnopengl/61.face_culling/61.face_culling.fs" };
 #pragma endregion
 
 #pragma region data_and_buffer
     float background_color[] { 0.1f, 0.1f, 0.1f, 1.0f };
     bool wire_mode { false };
 
-    GLfloat cubeVertices[] = {
-        // positions          // texture Coords
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //
-        0.5f,  -0.5f, -0.5f, 1.0f, 0.0f, //
-        0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-        0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-        -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //
-
-        -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
-        0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, //
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f, //
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f, //
-        -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, //
-        -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
-
-        -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, //
-        -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f, //
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-        -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
-        -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, //
-
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
-        0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-        0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, //
-        0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, //
-        0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, //
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
-
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-        0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, //
-        0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, //
-        0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, //
-        -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, //
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-
-        -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
-        0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f, //
-        -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, //
-        -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f  //
+    float cubeVertices[] = {
+        // Back face
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // Bottom-left
+        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,   // top-right
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f,  // bottom-right
+        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,   // top-right
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom-left
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,  // top-left
+        // Front face
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,  // bottom-right
+        0.5f, 0.5f, 0.5f, 1.0f, 1.0f,   // top-right
+        0.5f, 0.5f, 0.5f, 1.0f, 1.0f,   // top-right
+        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,  // top-left
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
+        // Left face
+        -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // top-right
+        -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,  // top-left
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,  // bottom-right
+        -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // top-right
+                                         // Right face
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,    // top-left
+        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,  // bottom-right
+        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,   // top-right
+        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,  // bottom-right
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,    // top-left
+        0.5f, -0.5f, 0.5f, 0.0f, 0.0f,   // bottom-left
+        // Bottom face
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // top-right
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,  // top-left
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,   // bottom-left
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,   // bottom-left
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,  // bottom-right
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // top-right
+        // Top face
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // bottom-right
+        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,  // top-right
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // bottom-right
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
+        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f   // bottom-left
     };
     GLfloat planeVertices[] = {
         // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture
@@ -205,8 +205,7 @@ int main(int argc, char *argv[]) {
     // load textures
     // -------------
     GLuint cubeTexture = loadTexture("asset/texture/marble.jpg");
-    // GLuint floorTexture = loadTexture("asset/texture/metal.png");
-    GLuint floorTexture = loadTexture("asset/texture/q3sky/zipfiles/ely_peaks/ely_peaks/peaks_bk.tga");
+    GLuint floorTexture = loadTexture("asset/texture/metal.png");
     GLuint windowTexture = loadTexture("asset/texture/window.png");
     // shader configuration
     // --------------------
@@ -263,12 +262,6 @@ int main(int argc, char *argv[]) {
 
         glBindVertexArray(vegetationVAO);
         glBindTexture(GL_TEXTURE_2D, windowTexture);
-        /*  for (unsigned int i = 0; i < windows.size(); i++) {
-             model = glm::mat4(1.0f);
-             model = glm::translate(model, windows[i]);
-             shader.setMat4("model", model);
-             glDrawArrays(GL_TRIANGLES, 0, 6);
-         } */
         for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, it->second);
@@ -307,10 +300,6 @@ int main(int argc, char *argv[]) {
 #pragma endregion
 
 #pragma region shutdown
-    /*     glDeleteVertexArrays(1, &cubeVAO);
-        glDeleteVertexArrays(1, &lightCubeVAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteTextures(1, &diffuseMap); */
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -415,6 +404,5 @@ GLuint loadTexture(const char *path) {
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
-
     return textureID;
 }

@@ -1,5 +1,7 @@
 add_includedirs("./include")
-add_cxflags("/utf-8")
+if is_plat("windows") then
+    add_cxflags("/utf-8")
+end
 
 target('sb7')
     add_files("./sb7/**.cpp", "./sb7/**.c")
