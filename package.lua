@@ -21,7 +21,6 @@ if is_plat("linux") then
 end
 
 
-
 -- 数据可视化
 add_requires("matplotplusplus") -- A C++ Graphics Library for Data Visualization
 add_requires("zeromq") -- High-performance, asynchronous messaging library
@@ -53,6 +52,7 @@ add_requires("msgpack-c") -- MessagePack implementation for C
 -- 测试
 add_requires("gtest") -- google test
 add_requires("catch2") -- 谷歌性能评估框架
+add_requires("benchmark") -- 谷歌性能评估框架
 
 -- 反射与序列化
 add_requires("magic_enum")  -- 枚举反射

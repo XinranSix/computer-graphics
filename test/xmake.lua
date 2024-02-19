@@ -6,11 +6,11 @@ includes("test_catch2")
 includes("test_box2d")
 includes("test_imgui_and_opengl")
 includes("test_eigen")
-includes("test_stb")
+includes("test_sdl")
 includes("test_boost")
 includes("test_opencv")
 includes("test_spdlog")
-includes("test_tbb")
+includes("test_onetbb")
 
 
 if is_plat("windows") then

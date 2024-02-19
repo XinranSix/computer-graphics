@@ -15,16 +15,11 @@ public:
 
 class solid_color : public texture {
 public:
-    solid_color(color c) : color_value { std::move(c) } {
-    }
+    solid_color(color c) : color_value { std::move(c) } {}
 
-    solid_color(double red, double green, double blue)
-        : solid_color { color { red, green, blue } } {
-    }
+    solid_color(double red, double green, double blue) : solid_color { color { red, green, blue } } {}
 
-    color value(double u, double v, const point3 &p) const override {
-        return color_value;
-    }
+    color value(double u, double v, const point3 &p) const override { return color_value; }
 
 private:
     color color_value;
@@ -32,16 +27,12 @@ private:
 
 class checker_texture : public texture {
 public:
-    checker_texture(double _scale, std::shared_ptr<texture> _even,
-                    std::shared_ptr<texture> _odd)
-        : inv_scale { 1.0 / _scale }, even { _even }, odd { _odd } {
-    }
+    checker_texture(double _scale, std::shared_ptr<texture> _even, std::shared_ptr<texture> _odd)
+        : inv_scale { 1.0 / _scale }, even { _even }, odd { _odd } {}
 
     checker_texture(double _scale, color c1, color c2)
-        : inv_scale { 1.0 / _scale },
-          even { std::make_shared<solid_color>(c1) },
-          odd { std::make_shared<solid_color>(c2) } {
-    }
+        : inv_scale { 1.0 / _scale }, even { std::make_shared<solid_color>(c1) },
+          odd { std::make_shared<solid_color>(c2) } {}
 
     color value(double u, double v, const point3 &p) const override {
         auto xInteger { static_cast<int>(std::floor(inv_scale * p.x())) };
@@ -61,8 +52,7 @@ private:
 
 class image_texture : public texture {
 public:
-    image_texture(const char *filename) : image { filename } {
-    }
+    image_texture(const char *filename) : image { filename } {}
 
     color value(double u, double v, const point3 &p) const override {
         // If we have no texture data, then return solid cayn, as d debugging
@@ -81,8 +71,7 @@ public:
 
         auto color_scale { 1.0 / 255.0 };
 
-        return { color_scale * pixel[0], color_scale * pixel[1],
-                 color_scale * pixel[2] };
+        return { color_scale * pixel[0], color_scale * pixel[1], color_scale * pixel[2] };
     }
 
 private:
@@ -93,8 +82,7 @@ class noise_texture : public texture {
 public:
     noise_texture() = default;
 
-    noise_texture(double sc) : scale { sc } {
-    }
+    noise_texture(double sc) : scale { sc } {}
 
     color value(double u, double v, const point3 &p) const override {
         auto s { scale * p };
