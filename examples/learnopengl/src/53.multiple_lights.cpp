@@ -14,19 +14,17 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "shader_s.h"
+#include "shader.h"
 #include "camera.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 void mouse_callback(GLFWwindow *window, double xposIn, double yposIn);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 unsigned int loadTexture(const char *path);
-
 
 // 全局数据
 // struct Material {
@@ -43,14 +41,16 @@ struct Light {
     glm::vec3 specular;
 };
 
-constexpr unsigned int SCR_WIDTH = 800;
-constexpr unsigned int SCR_HEIGHT = 600;
+unsigned int SCR_WIDTH = 800;
+unsigned int SCR_HEIGHT = 600;
 
 Camera camera { glm::vec3(0.0f, 0.0f, 3.0f) };
 float lastX { SCR_WIDTH / 2.0f };
 float lastY { SCR_HEIGHT / 2.0f };
 bool firstMouse { true };
 bool isInWindow { true };
+
+bool t { true };
 
 // timing
 float deltaTime {}; // time between current frame and last frame
@@ -216,7 +216,6 @@ int main(int argc, char *argv[]) {
 
 #pragma endregion
 
-
 #pragma region loop
     while (!glfwWindowShouldClose(window)) {
         // input
@@ -230,11 +229,9 @@ int main(int argc, char *argv[]) {
 
         glPolygonMode(GL_FRONT_AND_BACK, wire_mode ? GL_LINE : GL_FILL);
 
-
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
 
         lightingShader.use();
         lightingShader.setVec3("viewPos", camera.Position);
@@ -287,7 +284,6 @@ int main(int argc, char *argv[]) {
         lightingShader.setFloat("pointLights[3].linear", 0.09f);
         lightingShader.setFloat("pointLights[3].quadratic", 0.032f);
 
-
         auto projection { glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f,
                                            100.0f) };
         auto view { camera.GetViewMatrix() };
@@ -309,24 +305,21 @@ int main(int argc, char *argv[]) {
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
+        // also draw the lamp object(s)
+        lightCubeShader.use();
+        lightCubeShader.setMat4("projection", projection);
+        lightCubeShader.setMat4("view", view);
 
-       // also draw the lamp object(s)
-         lightCubeShader.use();
-         lightCubeShader.setMat4("projection", projection);
-         lightCubeShader.setMat4("view", view);
-    
-         // we now draw as many light bulbs as we have point lights.
-         glBindVertexArray(lightCubeVAO);
-         for (unsigned int i = 0; i < 4; i++)
-         {
-          auto   model = glm::mat4(1.0f);
-             model = glm::translate(model, pointLightPositions[i]);
-             model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-             lightCubeShader.setMat4("model", model);
-             lightCubeShader.setVec3("lightColor", lightColor);
-             glDrawArrays(GL_TRIANGLES, 0, 36);
-         }
-
+        // we now draw as many light bulbs as we have point lights.
+        glBindVertexArray(lightCubeVAO);
+        for (unsigned int i = 0; i < 4; i++) {
+            auto model = glm::mat4(1.0f);
+            model = glm::translate(model, pointLightPositions[i]);
+            model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+            lightCubeShader.setMat4("model", model);
+            lightCubeShader.setVec3("lightColor", lightColor);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
 #pragma region imgui render
         ImGui_ImplOpenGL3_NewFrame();
@@ -350,6 +343,8 @@ int main(int argc, char *argv[]) {
                ImGui::ColorEdit3("Cube Specular", glm::value_ptr(material.specular), ImGuiColorEditFlags_Float);
                ImGui::DragFloat("Cube Shininess", &material.shininess, 0.1f, 0.0f, 1000.0f); */
 
+        ImGui::NewLine();
+        ImGui::Checkbox("t", &t);
 
         ImGui::End();
         ImGui::Render();
@@ -417,6 +412,10 @@ void processInput(GLFWwindow *window) {
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+    if (t) {
+        SCR_HEIGHT = height;
+        SCR_WIDTH = width;
+    } 
     glViewport(0, 0, width, height);
 }
 
@@ -477,5 +476,3 @@ unsigned int loadTexture(char const *path) {
 
     return textureID;
 }
-
-

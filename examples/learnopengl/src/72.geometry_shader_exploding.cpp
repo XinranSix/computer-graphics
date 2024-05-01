@@ -9,6 +9,10 @@
 #include <stb_image.h>
 #include <vector>
 
+#ifndef STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#endif
+
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/glm.hpp"
@@ -20,7 +24,6 @@
 #include "shader_m.h"
 #include "camera.h"
 #include "model_e.h"
-
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -192,7 +195,6 @@ int main(int argc, char *argv[]) {
         // draw model
         ourModel.Draw(*shader);
 
-
 #pragma region imgui render
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -267,9 +269,7 @@ void processInput(GLFWwindow *window) {
     }
 }
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) { glViewport(0, 0, width, height); }
 
 void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
     if (isInWindow) {

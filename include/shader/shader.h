@@ -1,296 +1,168 @@
 #pragma once
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <memory>
+#include <glm/glm.hpp>
+
 #include <string>
-#include <string_view>
+#include <fstream>
+#include <sstream>
+#include <iostream>
 
 namespace ht {
-    namespace opengl {
-        enum class ShaderType {
-            VERTEX,
-            FRAGMENT,
-            GEOMETRY,
-            TESSELLATION_CONTROL,
-            TESSELLATION_EVALUATION,
-            COMPUTE
-        };
-        class Shader {
-        public:
-            explicit Shader(ShaderType type);
-            ~Shader() noexcept;
 
-            ShaderType shaderType() const;
+    class Shader {
+    public:
+        unsigned int ID;
+        // constructor generates the shader on the fly
+        // ------------------------------------------------------------------------
+        Shader(const char *vertexPath, const char *fragmentPath, const char *geometryPath = nullptr) {
+            // 1. retrieve the vertex/fragment source code from filePath
+            std::string vertexCode;
+            std::string fragmentCode;
+            std::string geometryCode;
+            std::ifstream vShaderFile;
+            std::ifstream fShaderFile;
+            std::ifstream gShaderFile;
+            // ensure ifstream objects can throw exceptions:
+            vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            try {
+                // open files
+                vShaderFile.open(vertexPath);
+                fShaderFile.open(fragmentPath);
+                std::stringstream vShaderStream, fShaderStream;
+                // read file's buffer contents into streams
+                vShaderStream << vShaderFile.rdbuf();
+                fShaderStream << fShaderFile.rdbuf();
+                // close file handlers
+                vShaderFile.close();
+                fShaderFile.close();
+                // convert stream into string
+                vertexCode = vShaderStream.str();
+                fragmentCode = fShaderStream.str();
+                // if geometry shader path is present, also load a geometry shader
+                if (geometryPath != nullptr) {
+                    gShaderFile.open(geometryPath);
+                    std::stringstream gShaderStream;
+                    gShaderStream << gShaderFile.rdbuf();
+                    gShaderFile.close();
+                    geometryCode = gShaderStream.str();
+                }
+            } catch (std::ifstream::failure &e) {
+                std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
+            }
+            const char *vShaderCode = vertexCode.c_str();
+            const char *fShaderCode = fragmentCode.c_str();
+            // 2. compile shaders
+            unsigned int vertex, fragment;
+            // vertex shader
+            vertex = glCreateShader(GL_VERTEX_SHADER);
+            glShaderSource(vertex, 1, &vShaderCode, NULL);
+            glCompileShader(vertex);
+            checkCompileErrors(vertex, "VERTEX");
+            // fragment Shader
+            fragment = glCreateShader(GL_FRAGMENT_SHADER);
+            glShaderSource(fragment, 1, &fShaderCode, NULL);
+            glCompileShader(fragment);
+            checkCompileErrors(fragment, "FRAGMENT");
+            // if geometry shader is given, compile geometry shader
+            unsigned int geometry;
+            if (geometryPath != nullptr) {
+                const char *gShaderCode = geometryCode.c_str();
+                geometry = glCreateShader(GL_GEOMETRY_SHADER);
+                glShaderSource(geometry, 1, &gShaderCode, NULL);
+                glCompileShader(geometry);
+                checkCompileErrors(geometry, "GEOMETRY");
+            }
+            // shader Program
+            ID = glCreateProgram();
+            glAttachShader(ID, vertex);
+            glAttachShader(ID, fragment);
+            if (geometryPath != nullptr)
+                glAttachShader(ID, geometry);
+            glLinkProgram(ID);
+            checkCompileErrors(ID, "PROGRAM");
+            // delete the shaders as they're linked into our program now and no longer necessary
+            glDeleteShader(vertex);
+            glDeleteShader(fragment);
+            if (geometryPath != nullptr) {
+                glDeleteShader(geometry);
+            }
+        }
+        // activate the shader
+        // ------------------------------------------------------------------------
+        void use() { glUseProgram(ID); }
+        // utility uniform functions
+        // ------------------------------------------------------------------------
+        void setBool(const std::string &name, bool value) const {
+            glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+        }
+        // ------------------------------------------------------------------------
+        void setInt(const std::string &name, int value) const {
+            glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+        }
+        // ------------------------------------------------------------------------
+        void setFloat(const std::string &name, float value) const {
+            glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+        }
+        // ------------------------------------------------------------------------
+        void setVec2(const std::string &name, const glm::vec2 &value) const {
+            glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+        }
+        void setVec2(const std::string &name, float x, float y) const {
+            glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
+        }
+        // ------------------------------------------------------------------------
+        void setVec3(const std::string &name, const glm::vec3 &value) const {
+            glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+        }
+        void setVec3(const std::string &name, float x, float y, float z) const {
+            glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
+        }
+        // ------------------------------------------------------------------------
+        void setVec4(const std::string &name, const glm::vec4 &value) const {
+            glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+        }
+        void setVec4(const std::string &name, float x, float y, float z, float w) {
+            glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
+        }
+        // ------------------------------------------------------------------------
+        void setMat2(const std::string &name, const glm::mat2 &mat) const {
+            glUniformMatrix2fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+        }
+        // ------------------------------------------------------------------------
+        void setMat3(const std::string &name, const glm::mat3 &mat) const {
+            glUniformMatrix3fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+        }
+        // ------------------------------------------------------------------------
+        void setMat4(const std::string &name, const glm::mat4 &mat) const {
+            glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+        }
 
-            bool compileSourceCode(std::string_view source);
-            bool compileSourceFile(std::string_view fileName);
-
-            std::string sourceCode() const;
-
-            bool isCompiled() const;
-            std::string log() const;
-
-            GLuint shaderId() const;
-
-            /*     static bool hasOpenGLShaders(ShaderType type,
-                                             GLFWwindow *context = nullptr); */
-
-        private:
-            class Impl;
-            std::unique_ptr<Impl> pImpl;
-        };
-
-    } // namespace opengl
-
-    namespace opengl {
-
-        class ShaderProgram {
-
-        public:
-            explicit ShaderProgram();
-            ~ShaderProgram();
-
-            bool addShader(Shader *shader);
-            /*  void removeShader(Shader *shader); */
-            /*    std::vector<Shader *> shaders() const; */
-
-            bool addShaderFromSourceCode(ShaderType type,
-                                         std::string_view source);
-            bool addShaderFromSourceFile(ShaderType type,
-                                         std::string_view fileName);
-
-            /*  bool addCacheableShaderFromSourceCode(Shader::ShaderType type,
-                                                   std::string_view source);
-             bool addCacheableShaderFromSourceFile(Shader::ShaderType type,
-                                                   std::string_view fileName);
-           */
-
-            /*    void removeAllShaders();
-             */
-            bool link();
-            bool isLinked() const;
-            std::string log() const;
-
-            bool bind();
-            // void release();
-
-            bool create();
-
-            GLuint programId() const;
-
-            /*     int maxGeometryOutputVertices() const;
-
-                void setPatchVertexCount(int count);
-                int patchVertexCount() const; */
-
-            /* void
-            setDefaultOuterTessellationLevels(const std::vector<float> &levels);
-            std::vector<float> defaultOuterTessellationLevels() const;
-
-            void
-            setDefaultInnerTessellationLevels(const std::vector<float> &levels);
-            std::vector<float> defaultInnerTessellationLevels() const; */
-            /*
-                    void bindAttributeLocation(std::string_view name, int
-               location);
-
-                    int attributeLocation(std::string_view name) const;
-
-                    void setAttributeValue(int location, GLfloat value);
-                    void setAttributeValue(int location, GLfloat x, GLfloat y);
-                    void setAttributeValue(int location, GLfloat x, GLfloat y,
-               GLfloat z); void setAttributeValue(int location, GLfloat x,
-               GLfloat y, GLfloat z, GLfloat w); void setAttributeValue(int
-               location, const glm::vec2 &value); void setAttributeValue(int
-               location, const glm::vec3 &value); void setAttributeValue(int
-               location, const glm::vec4 &value); void setAttributeValue(int
-               location, const GLfloat *values, int columns, int rows);
-
-                    void setAttributeValue(std::string_view name, GLfloat
-               value); void setAttributeValue(std::string_view name, GLfloat x,
-               GLfloat y); void setAttributeValue(std::string_view name, GLfloat
-               x, GLfloat y, GLfloat z); void setAttributeValue(std::string_view
-               name, GLfloat x, GLfloat y, GLfloat z, GLfloat w); void
-               setAttributeValue(std::string_view name, const glm::vec2 &value);
-                    void setAttributeValue(std::string_view name, const
-               glm::vec3 &value); void setAttributeValue(std::string_view name,
-               const glm::vec4 &value); void setAttributeValue(std::string_view
-               name, const GLfloat *values, int columns, int rows);
-
-                    void setAttributeArray(int location, const GLfloat *values,
-                                           int tupleSize, int stride = 0);
-                    void setAttributeArray(int location, const glm::vec2
-               *values, int stride = 0); void setAttributeArray(int location,
-               const glm::vec3 *values, int stride = 0); void
-               setAttributeArray(int location, const glm::vec4 *values, int
-               stride = 0); void setAttributeArray(int location, GLenum type,
-               const void *values, int tupleSize, int stride = 0); void
-               setAttributeArray(std::string_view name, const GLfloat *values,
-               int tupleSize, int stride = 0); void
-               setAttributeArray(std::string_view name, const glm::vec2 *values,
-               int stride = 0); void setAttributeArray(std::string_view name,
-               const glm::vec3 *values, int stride = 0); void
-               setAttributeArray(std::string_view name, const glm::vec4 *values,
-               int stride = 0); void setAttributeArray(std::string_view name,
-               GLenum type, const void *values, int tupleSize, int stride = 0);
-
-                    void setAttributeBuffer(int location, GLenum type, int
-               offset, int tupleSize, int stride = 0); void
-               setAttributeBuffer(std::string_view name, GLenum type, int
-               offset, int tupleSize, int stride = 0);
-
-                    void enableAttributeArray(int location);
-                    void enableAttributeArray(std::string_view name);
-                    void disableAttributeArray(int location);
-                    void disableAttributeArray(std::string_view name); */
-#if 0
-            int uniformLocation(std::string_view name) const;
-
-            void setUniformValue(int location, GLfloat value);
-            void setUniformValue(int location, GLint value);
-            void setUniformValue(int location, GLuint value);
-            void setUniformValue(int location, GLfloat x, GLfloat y);
-            void setUniformValue(int location, GLfloat x, GLfloat y, GLfloat z);
-            void setUniformValue(int location, GLfloat x, GLfloat y, GLfloat z,
-                                 GLfloat w);
-            void setUniformValue(int location, const glm::vec2 &value);
-            void setUniformValue(int location, const glm::vec3 &value);
-            void setUniformValue(int location, const glm::vec4 &value);
-            /*         void setUniformValue(int location, const QColor &color);
-                    void setUniformValue(int location, const QPoint &point);
-                    void setUniformValue(int location, const QPointF &point);
-                    void setUniformValue(int location, const QSize &size);
-                    void setUniformValue(int location, const QSizeF &size); */
-
-            void setUniformValue(int location, const glm::mat2x2 &value);
-            void setUniformValue(int location, const glm::mat2x3 &value);
-            void setUniformValue(int location, const glm::mat2x4 &value);
-            void setUniformValue(int location, const glm::mat3x2 &value);
-            void setUniformValue(int location, const glm::mat3x3 &value);
-            void setUniformValue(int location, const glm::mat3x4 &value);
-            void setUniformValue(int location, const glm::mat4x2 &value);
-            void setUniformValue(int location, const glm::mat4x3 &value);
-            void setUniformValue(int location, const glm::mat4x4 &value);
-            void setUniformValue(int location, const GLfloat value[2][2]);
-            void setUniformValue(int location, const GLfloat value[3][3]);
-            void setUniformValue(int location, const GLfloat value[4][4]);
-            /*         void setUniformValue(int location, const QTransform
-             * &value);
-             */
-
-            void setUniformValue(std::string_view name, GLfloat value);
-            void setUniformValue(std::string_view name, GLint value);
-            void setUniformValue(std::string_view name, GLuint value);
-            void setUniformValue(std::string_view name, GLfloat x, GLfloat y);
-            void setUniformValue(std::string_view name, GLfloat x, GLfloat y,
-                                 GLfloat z);
-            void setUniformValue(std::string_view name, GLfloat x, GLfloat y,
-                                 GLfloat z, GLfloat w);
-            void setUniformValue(std::string_view name, const glm::vec2 &value);
-            void setUniformValue(std::string_view name, const glm::vec3 &value);
-            void setUniformValue(std::string_view name, const glm::vec4 &value);
-            /*         void setUniformValue(std::string_view name, const QColor
-               &color); void setUniformValue(std::string_view name, const QPoint
-               &point); void setUniformValue(std::string_view name, const
-               QPointF &point); void setUniformValue(std::string_view name,
-               const QSize &size); void setUniformValue(std::string_view name,
-               const QSizeF &size); */
-            void setUniformValue(std::string_view name,
-                                 const glm::mat2x2 &value);
-            void setUniformValue(std::string_view name,
-                                 const glm::mat2x3 &value);
-            void setUniformValue(std::string_view name,
-                                 const glm::mat2x4 &value);
-            void setUniformValue(std::string_view name,
-                                 const glm::mat3x2 &value);
-            void setUniformValue(std::string_view name,
-                                 const glm::mat3x3 &value);
-            void setUniformValue(std::string_view name,
-                                 const glm::mat3x4 &value);
-            void setUniformValue(std::string_view name,
-                                 const glm::mat4x2 &value);
-            void setUniformValue(std::string_view name,
-                                 const glm::mat4x3 &value);
-            void setUniformValue(std::string_view name,
-                                 const glm::mat4x4 &value);
-            void setUniformValue(std::string_view name,
-                                 const GLfloat value[2][2]);
-            void setUniformValue(std::string_view name,
-                                 const GLfloat value[3][3]);
-            void setUniformValue(std::string_view name,
-                                 const GLfloat value[4][4]);
-            /*         void setUniformValue(std::string_view name, const
-             * QTransform &value); */
-
-            void setUniformValueArray(int location, const GLfloat *values,
-                                      int count, int tupleSize);
-            void setUniformValueArray(int location, const GLint *values,
-                                      int count);
-            void setUniformValueArray(int location, const GLuint *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::vec2 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::vec3 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::vec4 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::mat2x2 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::mat2x3 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::mat2x4 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::mat3x2 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::mat3x3 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::mat3x4 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::mat4x2 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::mat4x3 *values,
-                                      int count);
-            void setUniformValueArray(int location, const glm::mat4x4 *values,
-                                      int count);
-
-            void setUniformValueArray(std::string_view name,
-                                      const GLfloat *values, int count,
-                                      int tupleSize);
-            void setUniformValueArray(std::string_view name,
-                                      const GLint *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const GLuint *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::vec2 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::vec3 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::vec4 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::mat2x2 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::mat2x3 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::mat2x4 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::mat3x2 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::mat3x3 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::mat3x4 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::mat4x2 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::mat4x3 *values, int count);
-            void setUniformValueArray(std::string_view name,
-                                      const glm::mat4x4 *values, int count);
-
-            static bool hasOpenGLShaderPrograms(GLFWwindow *context = nullptr);
-#endif
-        private:
-            class Impl;
-            std::unique_ptr<Impl> pImpl;
-        };
-    } // namespace opengl
+    private:
+        // utility function for checking shader compilation/linking errors.
+        // ------------------------------------------------------------------------
+        void checkCompileErrors(GLuint shader, std::string type) {
+            GLint success;
+            GLchar infoLog[1024];
+            if (type != "PROGRAM") {
+                glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+                if (!success) {
+                    glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+                    std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
+                              << infoLog << "\n -- --------------------------------------------------- -- "
+                              << std::endl;
+                }
+            } else {
+                glGetProgramiv(shader, GL_LINK_STATUS, &success);
+                if (!success) {
+                    glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+                    std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
+                              << infoLog << "\n -- --------------------------------------------------- -- "
+                              << std::endl;
+                }
+            }
+        }
+    };
 } // namespace ht

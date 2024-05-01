@@ -36,9 +36,7 @@ public:
     bool gammaCorrection;
 
     // constructor, expects a filepath to a 3D model.
-    Model(string const &path, bool gamma = false) : gammaCorrection(gamma) {
-        loadModel(path);
-    }
+    Model(string const &path, bool gamma = false) : gammaCorrection(gamma) { loadModel(path); }
 
     // draws the model, and thus all its meshes
     void Draw(Shader &shader) {
@@ -183,7 +181,6 @@ private:
         return textures;
     }
 };
-
 
 inline unsigned int TextureFromFile(const char *path, const string &directory, bool gamma) {
     string filename = string(path);

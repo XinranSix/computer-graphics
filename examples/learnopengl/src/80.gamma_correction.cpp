@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
     while (!glfwWindowShouldClose(window)) {
         if (reload_shader) {
             for (auto &shader : shaders) {
-                Shader::reload(*shader);
+                // Shader::reload(*shader);
             }
             reload_shader = false;
         }

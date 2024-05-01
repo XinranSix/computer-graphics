@@ -1,0 +1,5 @@
+target('main')
+    add_files("./*.cpp")
+    add_packages("glad", "glm", "assimp", "stb", "spdlog", "glfw", "magic_enum")
+    add_deps("imgui", "ht")
+    set_rundir("$(projectdir)")

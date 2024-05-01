@@ -9,5 +9,5 @@ target('learnopengl_' .. path.basename(filepath))
     add_files(filepath)
     add_packages("glad", "glm", "assimp", "stb", "spdlog", "glfw", "magic_enum")
     add_deps("imgui")
-    set_rundir("$(projectdir)");
+    set_rundir("$(projectdir)")
 end

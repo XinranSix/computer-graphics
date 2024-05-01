@@ -1,19 +1,21 @@
-#pragma once
+#ifndef MODEL_H
+#define MODEL_H
+
+#ifndef STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#endif
 
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#endif
 #include <stb_image.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 #include "mesh.h"
-#include "shader_m.h"
+#include "shader.h"
 
 #include <string>
 #include <fstream>
@@ -23,7 +25,7 @@
 #include <vector>
 using namespace std;
 
-inline unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
+unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
 
 class Model {
 public:
@@ -35,9 +37,7 @@ public:
     bool gammaCorrection;
 
     // constructor, expects a filepath to a 3D model.
-    Model(string const &path, bool gamma = false) : gammaCorrection(gamma) {
-        loadModel(path);
-    }
+    Model(string const &path, bool gamma = false) : gammaCorrection(gamma) { loadModel(path); }
 
     // draws the model, and thus all its meshes
     void Draw(Shader &shader) {
@@ -194,7 +194,6 @@ private:
     }
 };
 
-
 inline unsigned int TextureFromFile(const char *path, const string &directory, bool gamma) {
     string filename = string(path);
     filename = directory + '/' + filename;
@@ -230,3 +229,4 @@ inline unsigned int TextureFromFile(const char *path, const string &directory, b
 
     return textureID;
 }
+#endif

@@ -7,12 +7,14 @@
 #include <string>
 #include <stb_image.h>
 
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/ext/vector_float3.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "shader_m.h"
 #include "camera.h"
-#include "model.h"
+#include "model_e.h"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -166,6 +168,8 @@ int main(int argc, char *argv[]) {
     unsigned int seacock_ore_MetallicMap = loadTexture("asset/texture/pbr/peacock-ore/peacock-ore_metallic.png");
     unsigned int eacock_ore_RoughnessMap = loadTexture("asset/texture/pbr/peacock-ore/peacock-ore_roughness.png");
     unsigned int eacock_ore_AOMap = loadTexture("asset/texture/pbr/peacock-ore/peacock-ore_ao.png");
+
+    Model ourModel { "asset/model/Cerberus_by_Andrew_Maximov/Cerberus_LP.FBX" };
 
     // lights
     // ------
@@ -516,6 +520,13 @@ int main(int argc, char *argv[]) {
         pbrShader.setMat4("model", model);
         pbrShader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
         renderSphere();
+
+        model = glm::mat4(1.0f);
+        model = glm::scale(model, glm::vec3 { 0.01, 0.01, 0.01 });
+        model = glm::translate(model, glm::vec3(3.0, 0.0, 2.0));
+        pbrShader.setMat4("model", model);
+        pbrShader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+        ourModel.Draw(pbrShader);
 
         // space cruiser panels2
         glActiveTexture(GL_TEXTURE3);

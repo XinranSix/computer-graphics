@@ -5,6 +5,9 @@
 #include "glm/ext/vector_float3.hpp"
 #include "glm/matrix.hpp"
 #include "glm/trigonometric.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 // clang-format on
 
 #include <iostream>
@@ -14,10 +17,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "shader_s.h"
+#include "shader.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"

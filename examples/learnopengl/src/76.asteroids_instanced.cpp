@@ -23,6 +23,7 @@
 #include "shader_m.h"
 #include "camera.h"
 #include "model_e.h"
+// #include 
 
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -190,7 +191,7 @@ int main(int argc, char *argv[]) {
     while (!glfwWindowShouldClose(window)) {
         if (reload_shader) {
             for (auto &shader : shaders) {
-                Shader::reload(*shader);
+                // Shader::reload(*shader);
             }
             reload_shader = false;
         }
